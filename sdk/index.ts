@@ -236,7 +236,7 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
               return async (...args: any[]) => {
                 switch (method) {
                   case "list":
-                    return http.request(`entities/${entity}`, {
+                    return http.request(`${entity}`, {
                       method: "GET",
                       query: clean({
                         sort: args[0]?.sort ?? args[0],
@@ -247,7 +247,7 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     });
                   case "filter": {
                     const p = args[0] ?? {};
-                    return http.request(`entities/${entity}`, {
+                    return http.request(`${entity}`, {
                       method: "GET",
                       query: clean({
                         q: JSON.stringify(p.q ?? p ?? {}),
@@ -259,17 +259,17 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     });
                   }
                   case "get":
-                    return http.request(`entities/${entity}/${encodeURIComponent(args[0])}`, { method: "GET" });
+                    return http.request(`${entity}/${encodeURIComponent(args[0])}`, { method: "GET" });
                   case "create": {
                     const data = args[0];
                     if (isFormDataLike(data)) {
-                      return http.request(`entities/${entity}`, { method: "POST", body: data });
+                      return http.request(`${entity}`, { method: "POST", body: data });
                     }
                     if (isFileLike(data) || hasFileLikeDeep(data)) {
                       const fd = isFileLike(data) ? (() => { const f = new FormData(); f.append("file", data); return f; })() : objectToFormData(data);
-                      return http.request(`entities/${entity}`, { method: "POST", body: fd });
+                      return http.request(`${entity}`, { method: "POST", body: fd });
                     }
-                    return http.request(`entities/${entity}`, {
+                    return http.request(`${entity}`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify(data),
@@ -279,22 +279,22 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     const id = args[0];
                     const data = args[1];
                     if (isFormDataLike(data)) {
-                      return http.request(`entities/${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: data });
+                      return http.request(`${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: data });
                     }
                     if (isFileLike(data) || hasFileLikeDeep(data)) {
                       const fd = isFileLike(data) ? (() => { const f = new FormData(); f.append("file", data); return f; })() : objectToFormData(data);
-                      return http.request(`entities/${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: fd });
+                      return http.request(`${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: fd });
                     }
-                    return http.request(`entities/${entity}/${encodeURIComponent(id)}`, {
+                    return http.request(`${entity}/${encodeURIComponent(id)}`, {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify(data),
                     });
                   }
                   case "delete":
-                    return http.request(`entities/${entity}/${encodeURIComponent(args[0])}`, { method: "DELETE" });
+                    return http.request(`${entity}/${encodeURIComponent(args[0])}`, { method: "DELETE" });
                   case "deleteMany":
-                    return http.request(`entities/${entity}/deleteMany`, {
+                    return http.request(`${entity}/deleteMany`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ query: args[0] }),
@@ -302,13 +302,13 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                   case "bulkCreate": {
                     const data = args[0];
                     if (isFormDataLike(data)) {
-                      return http.request(`entities/${entity}/bulk`, { method: "POST", body: data });
+                      return http.request(`${entity}/bulk`, { method: "POST", body: data });
                     }
                     if (hasFileLikeDeep(data)) {
                       const fd = objectToFormData({ data });
-                      return http.request(`entities/${entity}/bulk`, { method: "POST", body: fd });
+                      return http.request(`${entity}/bulk`, { method: "POST", body: fd });
                     }
-                    return http.request(`entities/${entity}/bulk`, {
+                    return http.request(`${entity}/bulk`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ data }),
@@ -317,10 +317,10 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                   case "importEntities": {
                     const form = new FormData();
                     form.append("file", args[0]);
-                    return http.request(`entities/${entity}/import`, { method: "POST", body: form });
+                    return http.request(`${entity}/import`, { method: "POST", body: form });
                   }
                   default:
-                    return http.request(`entities/${entity}`, { method: "GET", query: args[0] });
+                    return http.request(`${entity}`, { method: "GET", query: args[0] });
                 }
               };
             },
