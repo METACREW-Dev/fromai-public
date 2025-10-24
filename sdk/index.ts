@@ -20,7 +20,7 @@ export interface IntegrationsModule {
 }
 
 export interface Base44Client {
-  [namespace: string]: any; 
+  [namespace: string]: any;
   entities: EntitiesModule;
   integrations: IntegrationsModule;
   auth: any;
@@ -62,6 +62,55 @@ function clean<T extends Record<string, any>>(o: T): T {
   const c = { ...o };
   Object.keys(c).forEach((k) => (c as any)[k] === undefined && delete (c as any)[k]);
   return c;
+}
+
+/* ---------- multipart helpers ---------- */
+function isFileLike(v: any): v is File | Blob {
+  return (typeof File !== "undefined" && v instanceof File) || (typeof Blob !== "undefined" && v instanceof Blob);
+}
+function isFormDataLike(v: any): v is FormData {
+  return typeof FormData !== "undefined" && v instanceof FormData;
+}
+function hasFileLikeDeep(v: any): boolean {
+  if (!v || typeof v !== "object") return false;
+  if (isFormDataLike(v) || isFileLike(v)) return true;
+  if (Array.isArray(v)) return v.some(hasFileLikeDeep);
+  for (const val of Object.values(v)) if (hasFileLikeDeep(val)) return true;
+  return false;
+}
+function objectToFormData(obj: any, form = new FormData(), ns?: string): FormData {
+  if (obj == null) return form;
+
+  // File/Blob at root
+  if (isFileLike(obj)) {
+    form.append(ns || "file", obj);
+    return form;
+  }
+
+  if (Array.isArray(obj)) {
+    obj.forEach((v, i) => {
+      const key = ns ? `${ns}[${i}]` : String(i);
+      if (isFileLike(v)) form.append(key, v);
+      else if (typeof v === "object" && v !== null) objectToFormData(v, form, key);
+      else form.append(key, v == null ? "" : String(v));
+    });
+    return form;
+  }
+
+  if (typeof obj === "object") {
+    Object.entries(obj).forEach(([k, v]) => {
+      const key = ns ? `${ns}[${k}]` : k;
+      if (v == null) return;
+      if (isFileLike(v)) form.append(key, v);
+      else if (typeof v === "object") objectToFormData(v, form, key);
+      else form.append(key, String(v));
+    });
+    return form;
+  }
+
+  // primitive root
+  form.append(ns || "value", String(obj));
+  return form;
 }
 
 // ================== http ==================
@@ -121,6 +170,7 @@ function createHttp(cfg: ClientConfig) {
   return { request, setToken, getConfig };
 }
 
+/* ================== dynamic module (1-level) ================== */
 function createDynamicModule(basePath: string, http: ReturnType<typeof createHttp>) {
   return new Proxy(
     {},
@@ -129,6 +179,30 @@ function createDynamicModule(basePath: string, http: ReturnType<typeof createHtt
         const name = String(methodName);
         return async (...args: any[]) => {
           const [firstArg] = args;
+
+          // multipart cases
+          if (isFormDataLike(firstArg)) {
+            return http.request(`${basePath}/${encodeURIComponent(name)}`, {
+              method: "POST",
+              body: firstArg,
+            });
+          }
+          if (isFileLike(firstArg)) {
+            const fd = new FormData();
+            fd.append("file", firstArg);
+            return http.request(`${basePath}/${encodeURIComponent(name)}`, {
+              method: "POST",
+              body: fd,
+            });
+          }
+          if (hasFileLikeDeep(firstArg)) {
+            const fd = objectToFormData(firstArg);
+            return http.request(`${basePath}/${encodeURIComponent(name)}`, {
+              method: "POST",
+              body: fd,
+            });
+          }
+
           const isPost =
             typeof firstArg === "object" && !Array.isArray(firstArg) && Object.keys(firstArg || {}).length > 0;
 
@@ -147,6 +221,7 @@ function createDynamicModule(basePath: string, http: ReturnType<typeof createHtt
   );
 }
 
+// ================== entities ==================
 function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
   return new Proxy(
     {},
@@ -185,18 +260,37 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                   }
                   case "get":
                     return http.request(`entities/${entity}/${encodeURIComponent(args[0])}`, { method: "GET" });
-                  case "create":
+                  case "create": {
+                    const data = args[0];
+                    if (isFormDataLike(data)) {
+                      return http.request(`entities/${entity}`, { method: "POST", body: data });
+                    }
+                    if (isFileLike(data) || hasFileLikeDeep(data)) {
+                      const fd = isFileLike(data) ? (() => { const f = new FormData(); f.append("file", data); return f; })() : objectToFormData(data);
+                      return http.request(`entities/${entity}`, { method: "POST", body: fd });
+                    }
                     return http.request(`entities/${entity}`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(args[0]),
+                      body: JSON.stringify(data),
                     });
-                  case "update":
-                    return http.request(`entities/${entity}/${encodeURIComponent(args[0])}`, {
+                  }
+                  case "update": {
+                    const id = args[0];
+                    const data = args[1];
+                    if (isFormDataLike(data)) {
+                      return http.request(`entities/${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: data });
+                    }
+                    if (isFileLike(data) || hasFileLikeDeep(data)) {
+                      const fd = isFileLike(data) ? (() => { const f = new FormData(); f.append("file", data); return f; })() : objectToFormData(data);
+                      return http.request(`entities/${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: fd });
+                    }
+                    return http.request(`entities/${entity}/${encodeURIComponent(id)}`, {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(args[1]),
+                      body: JSON.stringify(data),
                     });
+                  }
                   case "delete":
                     return http.request(`entities/${entity}/${encodeURIComponent(args[0])}`, { method: "DELETE" });
                   case "deleteMany":
@@ -205,16 +299,26 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ query: args[0] }),
                     });
-                  case "bulkCreate":
+                  case "bulkCreate": {
+                    const data = args[0];
+                    if (isFormDataLike(data)) {
+                      return http.request(`entities/${entity}/bulk`, { method: "POST", body: data });
+                    }
+                    if (hasFileLikeDeep(data)) {
+                      const fd = objectToFormData({ data });
+                      return http.request(`entities/${entity}/bulk`, { method: "POST", body: fd });
+                    }
                     return http.request(`entities/${entity}/bulk`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ data: args[0] }),
+                      body: JSON.stringify({ data }),
                     });
-                  case "importEntities":
+                  }
+                  case "importEntities": {
                     const form = new FormData();
                     form.append("file", args[0]);
                     return http.request(`entities/${entity}/import`, { method: "POST", body: form });
+                  }
                   default:
                     return http.request(`entities/${entity}`, { method: "GET", query: args[0] });
                 }
@@ -227,7 +331,7 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
   );
 }
 
-// ================== integrations (2-level) ==================
+// ================== integrations (2-level, multipart-aware) ==================
 function createIntegrations(http: ReturnType<typeof createHttp>): IntegrationsModule {
   return new Proxy(
     {},
@@ -239,12 +343,34 @@ function createIntegrations(http: ReturnType<typeof createHttp>): IntegrationsMo
           {
             get(_t2, actionName: string) {
               const action = String(actionName);
-              return async (data?: any) =>
-                http.request(`integrations/${pkg}/${action}`, {
+              return async (data?: any) => {
+                if (isFormDataLike(data)) {
+                  return http.request(`integrations/${pkg}/${action}`, {
+                    method: "POST",
+                    body: data,
+                  });
+                }
+                if (isFileLike(data)) {
+                  const fd = new FormData();
+                  fd.append("file", data);
+                  return http.request(`integrations/${pkg}/${action}`, {
+                    method: "POST",
+                    body: fd,
+                  });
+                }
+                if (hasFileLikeDeep(data)) {
+                  const fd = objectToFormData(data);
+                  return http.request(`integrations/${pkg}/${action}`, {
+                    method: "POST",
+                    body: fd,
+                  });
+                }
+                return http.request(`integrations/${pkg}/${action}`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(data ?? {}),
                 });
+              };
             },
           }
         );
