@@ -186,19 +186,12 @@ function createHttp(cfg: ClientConfig) {
 
     if (!res.ok) {
       if (ct.includes("application/problem+json") && data) {
-        throw new Base44Error(
-          data.title || "Request failed",
-          data.status ?? res.status,
-          data.type,
-          data
-        );
+        throw new Base44Error(data.title || "Request failed", data.status ?? res.status, data.type, data);
       }
-      throw new Base44Error(
-        `HTTP ${res.status} ${res.statusText || ""}`.trim(),
-        res.status,
-        undefined,
-        data
-      );
+      if (ct.includes("application/json") && data) {
+        throw new Base44Error(data.message || "Request failed", data.statusCode ?? res.status, data.type, data);
+      }
+      throw new Base44Error(`HTTP ${res.status} ${res.statusText || ""}`.trim(), res.status, undefined, data);
     }
 
     return looksJson ? data.data ?? data : text;
