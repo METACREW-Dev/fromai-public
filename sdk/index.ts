@@ -39,7 +39,13 @@ export class Base44Error extends Error {
   code?: string;
   data?: any;
   originalError?: Error;
-  constructor(message: string, status?: number, code?: string, data?: any, originalError?: Error) {
+  constructor(
+    message: string,
+    status?: number,
+    code?: string,
+    data?: any,
+    originalError?: Error
+  ) {
     super(message);
     this.name = "Base44Error";
     this.status = status;
@@ -60,13 +66,18 @@ function arrToCsv(v?: string[] | string) {
 
 function clean<T extends Record<string, any>>(o: T): T {
   const c = { ...o };
-  Object.keys(c).forEach((k) => (c as any)[k] === undefined && delete (c as any)[k]);
+  Object.keys(c).forEach(
+    (k) => (c as any)[k] === undefined && delete (c as any)[k]
+  );
   return c;
 }
 
 /* ---------- multipart helpers ---------- */
 function isFileLike(v: any): v is File | Blob {
-  return (typeof File !== "undefined" && v instanceof File) || (typeof Blob !== "undefined" && v instanceof Blob);
+  return (
+    (typeof File !== "undefined" && v instanceof File) ||
+    (typeof Blob !== "undefined" && v instanceof Blob)
+  );
 }
 function isFormDataLike(v: any): v is FormData {
   return typeof FormData !== "undefined" && v instanceof FormData;
@@ -78,7 +89,11 @@ function hasFileLikeDeep(v: any): boolean {
   for (const val of Object.values(v)) if (hasFileLikeDeep(val)) return true;
   return false;
 }
-function objectToFormData(obj: any, form = new FormData(), ns?: string): FormData {
+function objectToFormData(
+  obj: any,
+  form = new FormData(),
+  ns?: string
+): FormData {
   if (obj == null) return form;
 
   // File/Blob at root
@@ -91,7 +106,8 @@ function objectToFormData(obj: any, form = new FormData(), ns?: string): FormDat
     obj.forEach((v, i) => {
       const key = ns ? `${ns}[${i}]` : String(i);
       if (isFileLike(v)) form.append(key, v);
-      else if (typeof v === "object" && v !== null) objectToFormData(v, form, key);
+      else if (typeof v === "object" && v !== null)
+        objectToFormData(v, form, key);
       else form.append(key, v == null ? "" : String(v));
     });
     return form;
@@ -117,7 +133,11 @@ function objectToFormData(obj: any, form = new FormData(), ns?: string): FormDat
 function createHttp(cfg: ClientConfig) {
   const fetchImpl = cfg.fetchImpl ?? fetch;
   const storageKey = cfg.storageKey ?? "__b44_token__";
-  let token = cfg.token ?? (typeof window !== "undefined" ? localStorage.getItem(storageKey) ?? undefined : undefined);
+  let token =
+    cfg.token ??
+    (typeof window !== "undefined"
+      ? localStorage.getItem(storageKey) ?? undefined
+      : undefined);
 
   const setToken = (t?: string, save?: boolean) => {
     token = t;
@@ -129,11 +149,17 @@ function createHttp(cfg: ClientConfig) {
 
   const buildUrl = (path: string, q?: Record<string, any>) => {
     const u = new URL(path, ensureBase(cfg.serverUrl));
-    if (q) Object.entries(q).forEach(([k, v]) => v != null && u.searchParams.append(k, String(v)));
+    if (q)
+      Object.entries(q).forEach(
+        ([k, v]) => v != null && u.searchParams.append(k, String(v))
+      );
     return u.toString();
   };
 
-  const request = async (path: string, init?: RequestInit & { query?: Record<string, any> }) => {
+  const request = async (
+    path: string,
+    init?: RequestInit & { query?: Record<string, any> }
+  ) => {
     const url = buildUrl(path, init?.query);
     const res = await fetchImpl(url, {
       ...init,
@@ -147,7 +173,9 @@ function createHttp(cfg: ClientConfig) {
     if (res.status === 204) return undefined;
     const ct = res.headers.get("content-type") || "";
     const text = await res.text();
-    const looksJson = ct.includes("application/json") || ct.includes("application/problem+json");
+    const looksJson =
+      ct.includes("application/json") ||
+      ct.includes("application/problem+json");
 
     let data: any = text;
     if (looksJson) {
@@ -158,9 +186,19 @@ function createHttp(cfg: ClientConfig) {
 
     if (!res.ok) {
       if (ct.includes("application/problem+json") && data) {
-        throw new Base44Error(data.title || "Request failed", data.status ?? res.status, data.type, data);
+        throw new Base44Error(
+          data.title || "Request failed",
+          data.status ?? res.status,
+          data.type,
+          data
+        );
       }
-      throw new Base44Error(`HTTP ${res.status} ${res.statusText || ""}`.trim(), res.status, undefined, data);
+      throw new Base44Error(
+        `HTTP ${res.status} ${res.statusText || ""}`.trim(),
+        res.status,
+        undefined,
+        data
+      );
     }
 
     return looksJson ? data.data ?? data : text;
@@ -171,7 +209,10 @@ function createHttp(cfg: ClientConfig) {
 }
 
 /* ================== dynamic module (1-level) ================== */
-function createDynamicModule(basePath: string, http: ReturnType<typeof createHttp>) {
+function createDynamicModule(
+  basePath: string,
+  http: ReturnType<typeof createHttp>
+) {
   return new Proxy(
     {},
     {
@@ -204,7 +245,9 @@ function createDynamicModule(basePath: string, http: ReturnType<typeof createHtt
           }
 
           const isPost =
-            typeof firstArg === "object" && !Array.isArray(firstArg) && Object.keys(firstArg || {}).length > 0;
+            typeof firstArg === "object" &&
+            !Array.isArray(firstArg) &&
+            Object.keys(firstArg || {}).length > 0;
 
           const opts: RequestInit & { query?: Record<string, any> } = isPost
             ? {
@@ -259,15 +302,30 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     });
                   }
                   case "get":
-                    return http.request(`${entity}/${encodeURIComponent(args[0])}`, { method: "GET" });
+                    return http.request(
+                      `${entity}/${encodeURIComponent(args[0])}`,
+                      { method: "GET" }
+                    );
                   case "create": {
                     const data = args[0];
                     if (isFormDataLike(data)) {
-                      return http.request(`${entity}`, { method: "POST", body: data });
+                      return http.request(`${entity}`, {
+                        method: "POST",
+                        body: data,
+                      });
                     }
                     if (isFileLike(data) || hasFileLikeDeep(data)) {
-                      const fd = isFileLike(data) ? (() => { const f = new FormData(); f.append("file", data); return f; })() : objectToFormData(data);
-                      return http.request(`${entity}`, { method: "POST", body: fd });
+                      const fd = isFileLike(data)
+                        ? (() => {
+                            const f = new FormData();
+                            f.append("file", data);
+                            return f;
+                          })()
+                        : objectToFormData(data);
+                      return http.request(`${entity}`, {
+                        method: "POST",
+                        body: fd,
+                      });
                     }
                     return http.request(`${entity}`, {
                       method: "POST",
@@ -279,11 +337,23 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     const id = args[0];
                     const data = args[1];
                     if (isFormDataLike(data)) {
-                      return http.request(`${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: data });
+                      return http.request(
+                        `${entity}/${encodeURIComponent(id)}`,
+                        { method: "PUT", body: data }
+                      );
                     }
                     if (isFileLike(data) || hasFileLikeDeep(data)) {
-                      const fd = isFileLike(data) ? (() => { const f = new FormData(); f.append("file", data); return f; })() : objectToFormData(data);
-                      return http.request(`${entity}/${encodeURIComponent(id)}`, { method: "PUT", body: fd });
+                      const fd = isFileLike(data)
+                        ? (() => {
+                            const f = new FormData();
+                            f.append("file", data);
+                            return f;
+                          })()
+                        : objectToFormData(data);
+                      return http.request(
+                        `${entity}/${encodeURIComponent(id)}`,
+                        { method: "PUT", body: fd }
+                      );
                     }
                     return http.request(`${entity}/${encodeURIComponent(id)}`, {
                       method: "PUT",
@@ -292,7 +362,10 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     });
                   }
                   case "delete":
-                    return http.request(`${entity}/${encodeURIComponent(args[0])}`, { method: "DELETE" });
+                    return http.request(
+                      `${entity}/${encodeURIComponent(args[0])}`,
+                      { method: "DELETE" }
+                    );
                   case "deleteMany":
                     return http.request(`${entity}/deleteMany`, {
                       method: "POST",
@@ -302,11 +375,17 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                   case "bulkCreate": {
                     const data = args[0];
                     if (isFormDataLike(data)) {
-                      return http.request(`${entity}/bulk`, { method: "POST", body: data });
+                      return http.request(`${entity}/bulk`, {
+                        method: "POST",
+                        body: data,
+                      });
                     }
                     if (hasFileLikeDeep(data)) {
                       const fd = objectToFormData({ data });
-                      return http.request(`${entity}/bulk`, { method: "POST", body: fd });
+                      return http.request(`${entity}/bulk`, {
+                        method: "POST",
+                        body: fd,
+                      });
                     }
                     return http.request(`${entity}/bulk`, {
                       method: "POST",
@@ -317,10 +396,16 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                   case "importEntities": {
                     const form = new FormData();
                     form.append("file", args[0]);
-                    return http.request(`${entity}/import`, { method: "POST", body: form });
+                    return http.request(`${entity}/import`, {
+                      method: "POST",
+                      body: form,
+                    });
                   }
                   default:
-                    return http.request(`${entity}`, { method: "GET", query: args[0] });
+                    return http.request(`${entity}`, {
+                      method: "GET",
+                      query: args[0],
+                    });
                 }
               };
             },
@@ -332,7 +417,9 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
 }
 
 // ================== integrations (2-level, multipart-aware) ==================
-function createIntegrations(http: ReturnType<typeof createHttp>): IntegrationsModule {
+function createIntegrations(
+  http: ReturnType<typeof createHttp>
+): IntegrationsModule {
   return new Proxy(
     {},
     {
@@ -390,30 +477,32 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
           switch (name) {
             case "me":
               return http.request("auth/me", { method: "GET" });
+
             case "updateMe":
               return http.request("auth/me", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(args[0]),
               });
-            case "login": {
-              const nextUrl = args[0];
-              const url = new URL(
-                `auth/login${nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : ""}`,
-                ensureBase(cfg.serverUrl)
-              ).toString();
-              if (typeof window !== "undefined") window.location.href = url;
-              return;
+
+            case "redirectToLogin": {
+                window.location.href = `/`;
+                return;
             }
+              
             case "logout": {
               const redirectUrl = args[0];
               await http.request("auth/logout", { method: "POST" });
               http.setToken(undefined, true);
-              if (redirectUrl && typeof window !== "undefined") window.location.href = redirectUrl;
+              if (redirectUrl && typeof window !== "undefined") {
+                window.location.href = redirectUrl;
+              }
               return;
             }
+
             case "setToken":
               return http.setToken(args[0], args[1]);
+
             case "isAuthenticated":
               try {
                 await http.request("auth/me", { method: "GET" });
@@ -421,7 +510,80 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
               } catch {
                 return false;
               }
+
+            case "loginViaEmailPassword": {
+              const payload =
+                typeof args[0] === "string" && typeof args[1] === "string"
+                  ? {
+                      email: args[0],
+                      password: args[1],
+                      turnstile_token: args[2],
+                    }
+                  : args[0];
+
+              const res = await http.request("auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+
+              const token = res?.access_token || res?.token || res?.data?.token;
+              if (token) http.setToken(token, true);
+
+              return res;
+            }
+
+            case "inviteUser":
+              return http.request("auth/invite", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: args[0], role: args[1] }),
+              });
+
+            case "register":
+              return http.request("auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(args[0]),
+              });
+
+            case "verifyOtp":
+              return http.request("auth/verify-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(args[0]),
+              });
+
+            case "resendOtp":
+              return http.request("auth/resend-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: args[0] }),
+              });
+
+            case "resetPasswordRequest":
+              return http.request("auth/reset-password-request", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: args[0] }),
+              });
+
+            case "resetPassword":
+              return http.request("auth/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(args[0]),
+              });
+
+            case "changePassword":
+              return http.request("auth/change-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(args[0]),
+              });
+
             default:
+              // default fallback call
               return http.request(`auth/${name}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -435,7 +597,10 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
 }
 
 // ================== asServiceRole ==================
-function createAsServiceRole(http: ReturnType<typeof createHttp>, token?: string) {
+function createAsServiceRole(
+  http: ReturnType<typeof createHttp>,
+  token?: string
+) {
   const serviceHttp = { ...http };
   if (token) serviceHttp.setToken(token, false);
   return {
