@@ -89,7 +89,7 @@ class SocialAuthSDK {
         return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=token&scope=profile email&state=${state}`;
 
       case 'kakao':
-        return `https://kauth.kakao.com/oauth/authorize?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=token&state=${state}`;
+        return `https://kauth.kakao.com/oauth/authorize?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=code&state=${state}`;
 
       case 'facebook':
         return `https://www.facebook.com/v13.0/dialog/oauth?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=token&scope=email,public_profile&state=${state}`;
