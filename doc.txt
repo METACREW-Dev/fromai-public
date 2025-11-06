@@ -1,2 +1,5 @@
 // add import => src/main.jsx 
 import "./auth-sdk/index"; 
+
+//start
+serve -c serve.json
