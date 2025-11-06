@@ -110,6 +110,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    localStorage.removeItem('access_token');
     window.location.href = "/";
   };
 
