@@ -3,3 +3,6 @@ import "./auth-sdk/index";
 
 //start
 serve -c serve.json
+
+//run scripts
+node replace-login-handler.js
