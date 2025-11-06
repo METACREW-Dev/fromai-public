@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>소셜 로그인 중...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800"
+  >
+    <div id="loading-container" class="flex flex-col items-center gap-4">
+      <div
+        class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
+      ></div>
+      <h1 class="text-lg font-semibold text-blue-600 animate-pulse">
+        소셜 로그인 중입니다...
+      </h1>
+      <p class="text-sm text-gray-500">
+        잠시만 기다려 주세요. 인증을 처리하고 있습니다.
+      </p>
+    </div>
+
+    <script type="module">
+      import { handleSocialCallback } from "/src/auth-sdk/callback.js";
+      handleSocialCallback();
+    </script>
+  </body>
+</html>

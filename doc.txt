@@ -1,0 +1,2 @@
+// add import => src/main.jsx 
+import "./auth-sdk/index"; 
