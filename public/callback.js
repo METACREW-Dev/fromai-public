@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_BASE44_BACKEND_URL;
+const API_BASE = VITE_BASE44_BACKEND_URL;
 
 export async function handleSocialCallback() {
   try {
