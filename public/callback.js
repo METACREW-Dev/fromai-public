@@ -51,18 +51,7 @@ export async function handleSocialCallback() {
     if (window.opener) {
       try {
         window.opener.localStorage.setItem("access_token", backendToken);
-
-        const parentUrl = window.opener.location.href;
-        if (
-          parentUrl.includes("/login") ||
-          parentUrl.includes("/signin") ||
-          parentUrl.includes("/signup") ||
-          parentUrl.includes("/register")
-        ) {
-          window.opener.location.href = "/";
-        } else {
-          window.opener.location.reload();
-        }
+        window.opener.location.href = "/";
       } catch (err) {
         console.warn("⚠️ Cannot save token or redirect parent:", err);
       }
