@@ -132,7 +132,7 @@ function objectToFormData(
 // ================== http ==================
 function createHttp(cfg: ClientConfig) {
   const fetchImpl = cfg.fetchImpl ?? fetch;
-  const storageKey = cfg.storageKey ?? "__b44_token__";
+  const storageKey = cfg.storageKey ?? "access_token";
   let token =
     cfg.token ??
     (typeof window !== "undefined"
@@ -637,7 +637,7 @@ function createAsServiceRole(
 function createCleanup() {
   return () => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("__b44_token__");
+      localStorage.removeItem("access_token");
     }
   };
 }
