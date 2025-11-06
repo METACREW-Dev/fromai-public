@@ -186,12 +186,27 @@ function createHttp(cfg: ClientConfig) {
 
     if (!res.ok) {
       if (ct.includes("application/problem+json") && data) {
-        throw new Base44Error(data.title || "Request failed", data.status ?? res.status, data.type, data);
+        throw new Base44Error(
+          data.title || "Request failed",
+          data.status ?? res.status,
+          data.type,
+          data
+        );
       }
       if (ct.includes("application/json") && data) {
-        throw new Base44Error(data.message || "Request failed", data.statusCode ?? res.status, data.type, data);
+        throw new Base44Error(
+          data.message || "Request failed",
+          data.statusCode ?? res.status,
+          data.type,
+          data
+        );
       }
-      throw new Base44Error(`HTTP ${res.status} ${res.statusText || ""}`.trim(), res.status, undefined, data);
+      throw new Base44Error(
+        `HTTP ${res.status} ${res.statusText || ""}`.trim(),
+        res.status,
+        undefined,
+        data
+      );
     }
 
     return looksJson ? data.data ?? data : text;
@@ -470,6 +485,17 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
           switch (name) {
             case "me":
               return http.request("auth/me", { method: "GET" });
+            case "login": {
+              const nextUrl = args[0];
+              const url = new URL(
+                `auth/login${
+                  nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : ""
+                }`,
+                ensureBase(cfg.serverUrl)
+              ).toString();
+              if (typeof window !== "undefined") window.location.href = url;
+              return;
+            }
 
             case "updateMe":
               return http.request("auth/me", {
@@ -479,10 +505,10 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
               });
 
             case "redirectToLogin": {
-                window.location.href = `/`;
-                return;
+              window.location.href = `/`;
+              return;
             }
-              
+
             case "logout": {
               const redirectUrl = args[0];
               await http.request("auth/logout", { method: "POST" });
