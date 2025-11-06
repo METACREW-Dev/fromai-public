@@ -5,13 +5,14 @@ import path from "path";
 const projectRoot = process.cwd();
 const srcPath = path.join(projectRoot, "src");
 
-const regex = /export\s+const\s+AuthProvider\s*=\s*\(\{\s*children\s*\}\)\s*=>\s*\{[\s\S]*?\n\};/m;
+const regex =
+  /export\s+const\s+AuthProvider\s*=\s*\(\{\s*children\s*\}\)\s*=>\s*\{[\s\S]*?\n\};/m;
 
 const protectedLogic = `
   const redirectToLogin = useCallback((returnUrl) => {
     const url = returnUrl || window.location.pathname;
-    navigate(createPageUrl("SignIn"), { state: { returnUrl: url } });
-  }, [navigate]);
+    base44.auth.redirectToLogin(createPageUrl(url));
+  }, []);
 
   const isProtectedPage = useCallback(
     (pathname) => PROTECTED_PAGES.some((page) => pathname.includes(page)),
@@ -32,9 +33,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAppState();
   }, []);
-
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const checkAppState = async () => {
     try {
@@ -123,8 +121,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
-    base44.auth.redirectToLogin(window.location.href);
+    // Use the SDK's redirectToLogin method
+    if (base44.auth.redirectToLogin) {
+      base44.auth.redirectToLogin(window.location.href);
+    } else if (base44.auth.login) {
+      base44.auth.login(window.location.href);
+    }
   };
+  
 ${includeProtectedLogic ? protectedLogic : ""}
 
   return (
@@ -165,7 +169,7 @@ function findAuthContextFiles(dir) {
 
 const foundFiles = findAuthContextFiles(srcPath);
 if (foundFiles.length === 0) {
-  console.error("❌ Not found AuthContext src/");
+  console.error("❌ Không tìm thấy file AuthContext trong src/");
   process.exit(1);
 }
 
@@ -176,27 +180,26 @@ for (const filePath of foundFiles) {
   if (!regex.test(code)) continue;
 
   const hasProtectedPages = /PROTECTED_PAGES/.test(code);
-  const hasReactRouterImport = /from\s+["']react-router-dom["']/.test(code);
-  const hasUseNavigateHook = /useNavigate\s*\(\)/.test(code);
+  const hasRouterImport = /from\s+["']react-router-dom["']/.test(code);
+  const hasFullRouterImport =
+    /import\s*\{\s*[^}]*useNavigate[^}]*useLocation[^}]*\}\s*from\s*["']react-router-dom["']/.test(
+      code
+    );
 
   const newCodeBlock = buildNewAuthProvider(hasProtectedPages).trim();
   let newCode = code.replace(regex, newCodeBlock);
-  if (!hasReactRouterImport) {
-    newCode =
-      `import { useNavigate, useLocation } from "react-router-dom";\n` + newCode;
-  }
 
-  else if (
-    hasReactRouterImport &&
-    !/useNavigate/.test(code)
-  ) {
+  if (!hasRouterImport) {
+    newCode = `import { useNavigate, useLocation } from "react-router-dom";\n${newCode}`;
+  } else if (hasRouterImport && !hasFullRouterImport) {
     newCode = newCode.replace(
       /(import\s*\{)([^}]*)(\}\s*from\s*["']react-router-dom["'])/,
       (match, p1, p2, p3) => {
-        const additions = ["useNavigate", "useLocation"].filter(
-          (hook) => !p2.includes(hook)
+        const existingHooks = p2.split(",").map((h) => h.trim());
+        const missingHooks = ["useNavigate", "useLocation"].filter(
+          (hook) => !existingHooks.includes(hook)
         );
-        return `${p1}${p2.trim()}, ${additions.join(", ")}${p3}`;
+        return `${p1} ${[...existingHooks, ...missingHooks].join(", ")} ${p3}`;
       }
     );
   }
@@ -204,12 +207,9 @@ for (const filePath of foundFiles) {
   fs.writeFileSync(filePath, newCode, "utf8");
   replacedCount++;
   console.log(
-    `✅ Updated: ${path.relative(projectRoot, filePath)} (PROTECTED_PAGES: ${hasProtectedPages}, added router-dom import: ${!hasReactRouterImport})`
+    `✅ Updated: ${path.relative(
+      projectRoot,
+      filePath
+    )} (PROTECTED_PAGES: ${hasProtectedPages})`
   );
-}
-
-if (replacedCount === 0) {
-  console.warn("⚠️ Not found any file to replace.");
-} else {
-  console.log(`✨All replace ${replacedCount} file.`);
 }

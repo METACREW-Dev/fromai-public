@@ -25,7 +25,7 @@ const newLogic = `
       localStorage.setItem('access_token', response.token);
     }
     
-    window.location.href = createPageUrl("Console");
+    window.location.href = "/";
   } catch (error) {
     console.error("Login error:", error);
     setError(error.message || "Invalid email or password. Please try again.");

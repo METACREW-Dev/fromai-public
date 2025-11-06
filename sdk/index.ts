@@ -504,10 +504,13 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
                 body: JSON.stringify(args[0]),
               });
 
-            case "redirectToLogin": {
-              window.location.href = `/`;
+              case "redirectToLogin":
+                const currentUrl = args[0];
+                if (currentUrl) {
+                  window.location.href = `/SignIn?redirect=${currentUrl}`;
+                }
+              window.location.href = `/SignIn`;
               return;
-            }
 
             case "logout": {
               const redirectUrl = args[0];
