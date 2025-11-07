@@ -51,7 +51,8 @@ class SocialAuthSDK {
   async login(provider) {
     const { clientIds, redirectUri } = this.cfg;
     const clientId = clientIds[provider];
-    const state = encodeURIComponent(JSON.stringify({ provider, redirectUri, clientId }));
+    const kakaoSerect = clientIds['kakao_serect'];
+    const state = provider === "kakao" ? encodeURIComponent(JSON.stringify({ provider, redirectUri, clientId, kakaoSerect })) :  encodeURIComponent(JSON.stringify({ provider }));
 
     const url = this.getAuthUrl(provider, clientId, redirectUri, state);
 
@@ -143,6 +144,7 @@ const sdk = new SocialAuthSDK({
   clientIds: {
     google: import.meta.env.VITE_GOOGLE_CLIENT_ID,
     kakao: import.meta.env.VITE_KAKAO_REST_API_KEY,
+    kakao_serect: import.meta.env.VITE_CLIENT_SERECT,
     facebook: import.meta.env.VITE_FACEBOOK_APP_ID,
     naver: import.meta.env.VITE_NAVER_CLIENT_ID,
     apple: import.meta.env.VITE_APPLE_CLIENT_ID, 

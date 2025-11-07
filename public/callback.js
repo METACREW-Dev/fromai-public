@@ -9,6 +9,7 @@ export async function handleSocialCallback() {
     let provider = params.provider;
     let redirectUri = "";
     let clientId = "";
+    let kakaoSerect = "";
 
     if (!provider && params.state) {
       try {
@@ -16,6 +17,7 @@ export async function handleSocialCallback() {
         provider = stateObj.provider;
         redirectUri = stateObj.redirectUri;
         clientId = stateObj.clientId;
+        kakaoSerect = stateObj.kakaoSerect;
       } catch (err) {
         console.warn("⚠️ state 파싱 오류:", err);
       }
@@ -37,6 +39,7 @@ export async function handleSocialCallback() {
           client_id: clientId,
           code: authCode,
           redirect_uri: redirectUri,
+          client_secret: kakaoSerect
         });
 
         const tokenRes = await fetch("https://kauth.kakao.com/oauth/token", {
