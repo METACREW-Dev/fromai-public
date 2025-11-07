@@ -96,7 +96,7 @@ class SocialAuthSDK {
         return `https://www.facebook.com/v13.0/dialog/oauth?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=token&scope=email,public_profile&state=${state}`;
 
       case 'naver':
-        return `https://nid.naver.com/oauth2.0/authorize?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=token&state=${state}`;
+        return `https://nid.naver.com/oauth2.0/authorize?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=token&state=${encodeURIComponent(state)}`;
 
       case 'apple':
         return `https://appleid.apple.com/auth/authorize?client_id=${id}&redirect_uri=${encodedRedirect}&response_type=token%20id_token&scope=name%20email&response_mode=fragment&state=${state}`;
