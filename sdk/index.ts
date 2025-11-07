@@ -504,13 +504,27 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
                 body: JSON.stringify(args[0]),
               });
 
-              case "redirectToLogin":
-                const currentUrl = args[0];
-                if (currentUrl) {
-                  window.location.href = `/SignIn?redirect=${currentUrl}`;
-                }
-              window.location.href = `/SignIn`;
+            case "redirectToLogin": {
+              const currentUrl = args[0];
+              const currentPath = window.location.pathname;
+
+              const loginPatterns = /(login|sign[-_]?in)/i;
+              if (loginPatterns.test(currentPath)) {
+                return;
+              }
+
+              const baseSegment = window.location.pathname.split("/")[1];
+              let loginPath = `/${baseSegment || ""}/SignIn`;
+
+              loginPath = loginPath.replace(/\/{2,}/g, "/").replace(/\/+$/, "");
+
+              const redirectUrl = currentUrl
+                ? `${loginPath}?redirect=${encodeURIComponent(currentUrl)}`
+                : loginPath;
+
+              window.location.href = redirectUrl;
               return;
+            }
 
             case "logout": {
               const redirectUrl = args[0];
