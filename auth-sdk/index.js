@@ -51,7 +51,7 @@ class SocialAuthSDK {
   async login(provider) {
     const { clientIds, redirectUri } = this.cfg;
     const clientId = clientIds[provider];
-    const state = encodeURIComponent(JSON.stringify({ provider, redirectUri }));
+    const state = encodeURIComponent(JSON.stringify({ provider, redirectUri, clientId }));
 
     const url = this.getAuthUrl(provider, clientId, redirectUri, state);
 

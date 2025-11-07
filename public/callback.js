@@ -2,36 +2,57 @@ const API_BASE = "VITE_BASE44_BACKEND_URL";
 
 export async function handleSocialCallback() {
   try {
-
     const search = new URLSearchParams(window.location.search);
     const hash = new URLSearchParams(window.location.hash.substring(1));
-
     const params = { ...Object.fromEntries(search.entries()), ...Object.fromEntries(hash.entries()) };
 
     let provider = params.provider;
     let redirectUri = "";
+    let clientId = "";
+
     if (!provider && params.state) {
       try {
         const stateObj = JSON.parse(decodeURIComponent(params.state));
         provider = stateObj.provider;
         redirectUri = stateObj.redirectUri;
+        clientId = stateObj.clientId;
       } catch (err) {
         console.warn("⚠️ state 파싱 오류:", err);
       }
     }
 
-    const accessToken = params.access_token;
+    let accessToken = params.access_token;
     const idToken = params.id_token;
     const authCode = params.code;
 
-    if (!provider) {
-      showError("⚠️ 제공자(provider)를 확인할 수 없습니다.");
-      return;
-    }
+    if (!provider) return showError("⚠️ 제공자(provider)를 확인할 수 없습니다.");
+    if (!accessToken && !idToken && !authCode) return showError("⚠️ 토큰 또는 코드 정보가 없습니다.");
 
-    if (!accessToken && !idToken && !authCode) {
-      showError("⚠️ 토큰 또는 코드 정보가 없습니다.");
-      return;
+    if (provider === "kakao" && !accessToken && authCode) {
+      try {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+        const raw = new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: clientId,
+          code: authCode,
+          redirect_uri: redirectUri,
+        });
+
+        const tokenRes = await fetch("https://kauth.kakao.com/oauth/token", {
+          method: "POST",
+          headers: myHeaders,
+          body: raw,
+        });
+
+        if (!tokenRes.ok) throw new Error("⚠️ Kakao token 요청 실패");
+
+        const tokenData = await tokenRes.json();
+        accessToken = tokenData.access_token;
+      } catch (err) {
+        console.error("❌ Kakao token fetch error:", err);
+        return showError("⚠️ 카카오 토큰을 가져오지 못했습니다.");
+      }
     }
 
     let userInfo = null;
@@ -42,28 +63,20 @@ export async function handleSocialCallback() {
     const apiUrl = `${API_BASE}/auth/login`;
     const payload = {
       provider_type: provider,
-      provider_token: accessToken || idToken || authCode,
+      provider_token: accessToken || idToken,
     };
-
-    if (redirectUri && provider === "kakao") {
-      payload.redirect_uri = redirectUri;
-    }
 
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    if (!response.ok) {
-      throw new Error(`❌ 백엔드 로그인 요청 실패 (${response.status})`);
-    }
+
+    if (!response.ok) throw new Error(`❌ 백엔드 로그인 요청 실패 (${response.status})`);
 
     const result = await response.json();
     const backendToken = result?.data?.access_token;
-
-    if (!backendToken) {
-      throw new Error("⚠️ 백엔드에서 access_token을 받지 못했습니다.");
-    }
+    if (!backendToken) throw new Error("⚠️ 백엔드에서 access_token을 받지 못했습니다.");
 
     if (window.opener) {
       try {
@@ -90,15 +103,14 @@ export async function handleSocialCallback() {
     }
   } catch (e) {
     console.error("❌ 소셜 로그인 콜백 오류:", e);
-
     if (window.opener) {
       window.opener.postMessage({ __socialAuth: true, ok: false, error: e.message }, "*");
     }
-
     showError(`${e.message}`);
     setTimeout(() => window.close(), 5000);
   }
 }
+
 function decodeAppleToken(idToken) {
   try {
     const [header, payload] = idToken.split(".");
@@ -131,5 +143,3 @@ function showError(message) {
       </div>
     </div>`;
 }
-
-
