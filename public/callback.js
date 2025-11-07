@@ -9,10 +9,12 @@ export async function handleSocialCallback() {
     const params = { ...Object.fromEntries(search.entries()), ...Object.fromEntries(hash.entries()) };
 
     let provider = params.provider;
+    let redirectUri = "";
     if (!provider && params.state) {
       try {
         const stateObj = JSON.parse(decodeURIComponent(params.state));
         provider = stateObj.provider;
+        redirectUri = stateObj.redirectUri;
       } catch (err) {
         console.warn("⚠️ state 파싱 오류:", err);
       }
@@ -41,8 +43,11 @@ export async function handleSocialCallback() {
     const payload = {
       provider_type: provider,
       provider_token: accessToken || idToken || authCode,
-      profile: userInfo,
     };
+
+    if (redirectUri && provider === "kakao") {
+      payload.redirect_uri = redirectUri;
+    }
 
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -73,6 +78,7 @@ export async function handleSocialCallback() {
           },
           "*"
         );
+        window.opener.location.href = "/";
         showSuccess("✅ 로그인 성공! 잠시 후 창이 닫힙니다...");
         setTimeout(() => window.close(), 1000);
       } catch (err) {
