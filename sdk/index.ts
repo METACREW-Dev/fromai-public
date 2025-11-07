@@ -485,6 +485,7 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
           switch (name) {
             case "me":
               return http.request("auth/me", { method: "GET" });
+
             case "login": {
               const nextUrl = args[0];
               const url = new URL(
@@ -509,17 +510,34 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
               const currentPath = window.location.pathname;
 
               const loginPatterns = /(login|sign[-_]?in)/i;
-              if (loginPatterns.test(currentPath)) {
-                return;
-              }
+              if (loginPatterns.test(currentPath)) return;
 
-              const baseSegment = window.location.pathname.split("/")[1];
-              let loginPath = `/${baseSegment || ""}/SignIn`;
+              const knownLoginPaths = [
+                "/signin",
+                "/sign-in",
+                "/SignIn",
+                "/signIn",
+                "/login",
+                "/Login",
+              ];
 
-              loginPath = loginPath.replace(/\/{2,}/g, "/").replace(/\/+$/, "");
+              const detectedLoginPath =
+                knownLoginPaths.find((p) =>
+                  window.location.pathname.includes(p.split("/")[1])
+                ) ||
+                knownLoginPaths.find((p) =>
+                  document.body.innerHTML.includes(p)
+                ) ||
+                null;
+
+              const loginPath = detectedLoginPath || "/signin";
+
+              const cleanRedirect = (currentUrl || window.location.pathname)
+                .replace(/^\/+/, "")
+                .replace(/\/+$/, "");
 
               const redirectUrl = currentUrl
-                ? `${loginPath}?redirect=${encodeURIComponent(currentUrl)}`
+                ? `${loginPath}?redirect=/${encodeURIComponent(cleanRedirect)}`
                 : loginPath;
 
               window.location.href = redirectUrl;
