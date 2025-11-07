@@ -100,9 +100,11 @@ export async function handleSocialCallback() {
       } catch (err) {
         console.warn("⚠️ 토큰 저장 실패:", err);
         showError("⚠️ 부모 창에 토큰을 저장할 수 없습니다.");
+        setTimeout(() => window.close(), 5000);
       }
     } else {
       showError("⚠️ 부모 창을 찾을 수 없습니다. 팝업 로그인으로 다시 시도해주세요.");
+      setTimeout(() => window.close(), 5000);
     }
   } catch (e) {
     console.error("❌ 소셜 로그인 콜백 오류:", e);
