@@ -11,7 +11,7 @@ const newLogic = `
   setError("");
   
   if (!formData.email || !formData.password) {
-    setError("Please enter both email and password");
+    setError("이메일과 비밀번호를 모두 입력해주세요.");
     return;
   }
 
@@ -28,7 +28,7 @@ const newLogic = `
     window.location.href = "/";
   } catch (error) {
     console.error("Login error:", error);
-    setError(error.message || "Invalid email or password. Please try again.");
+    setError(error.message || "이메일 또는 비밀번호가 잘못되었습니다. 다시 시도해 주세요.");
     setIsLoading(false);
   }
 }

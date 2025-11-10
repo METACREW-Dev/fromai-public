@@ -3,32 +3,22 @@ import fs from "fs";
 import path from "path";
 
 const projectRoot = process.cwd();
-const srcPath = path.join(projectRoot, "src");
+
+const targetDir = path.join(projectRoot, "src/lib");
+const targetFile = path.join(targetDir, "AuthContext.jsx");
 
 const regex =
   /export\s+const\s+AuthProvider\s*=\s*\(\{\s*children\s*\}\)\s*=>\s*\{[\s\S]*?\n\};/m;
 
-const protectedLogic = `
-  const redirectToLogin = useCallback((returnUrl) => {
-    const url = returnUrl || window.location.pathname;
-    base44.auth.redirectToLogin(createPageUrl(url));
-  }, []);
-
-  const isProtectedPage = useCallback(
-    (pathname) => PROTECTED_PAGES.some((page) => pathname.includes(page)),
-    []
-  );
-`;
-
-function buildNewAuthProvider(includeProtectedLogic = false) {
-  return `
-export const AuthProvider = ({ children }) => {
+// New AuthProvider code block to inject
+function buildNewAuthProvider() {
+  return `export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
+  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
-  const appPublicSettings = {};
+  const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
     checkAppState();
@@ -36,20 +26,29 @@ export const AuthProvider = ({ children }) => {
 
   const checkAppState = async () => {
     try {
-      setIsLoadingPublicSettings(true);
       setAuthError(null);
-
+      
       try {
-        if (localStorage.getItem('access_token')) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          const currentPath = location.pathname.toLowerCase();
+          const isPrivate = Object.keys(PRIVATE_PAGES)
+            .map(k => \`/\${k.toLowerCase()}\`)
+            .some((p) => currentPath.startsWith(p));
+  
+          if (isPrivate) {
+            navigate("/signin", { replace: true });
+          }
+  
           setIsAuthenticated(false);
+          setIsLoadingAuth(false);
+          return;
         }
-        setIsLoadingPublicSettings(false);
+        await checkUserAuth();
       } catch (appError) {
         console.error('App state check failed:', appError);
         
+        // Handle app-level errors
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
           if (reason === 'auth_required') {
@@ -74,7 +73,6 @@ export const AuthProvider = ({ children }) => {
             message: appError.message || 'Failed to load app'
           });
         }
-        setIsLoadingPublicSettings(false);
         setIsLoadingAuth(false);
       }
     } catch (error) {
@@ -83,23 +81,23 @@ export const AuthProvider = ({ children }) => {
         type: 'unknown',
         message: error.message || 'An unexpected error occurred'
       });
-      setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
     }
   };
 
   const checkUserAuth = async () => {
     try {
+      // Now check if the user is authenticated
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      const res = await base44.auth.me();
+      setUser(res?.data || null);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      
+      // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
         setAuthError({
           type: 'auth_required',
@@ -109,21 +107,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    window.location.href = "/";
+  const logout = (shouldRedirect = true) => {
+    setUser(null);
+    setIsAuthenticated(false);
+    
+    if (shouldRedirect) {
+      // Use the SDK's logout method which handles token cleanup and redirect
+      base44.auth.logout(window.location.href);
+    } else {
+      // Just remove the token without redirect
+      base44.auth.logout();
+    }
   };
 
   const navigateToLogin = () => {
     // Use the SDK's redirectToLogin method
-    if (base44.auth.redirectToLogin) {
-      base44.auth.redirectToLogin(window.location.href);
-    } else if (base44.auth.login) {
-      base44.auth.login(window.location.href);
-    }
+    base44.auth.redirectToLogin(window.location.href);
   };
-  
-${includeProtectedLogic ? protectedLogic : ""}
 
   return (
     <AuthContext.Provider value={{ 
@@ -135,9 +135,8 @@ ${includeProtectedLogic ? protectedLogic : ""}
       appPublicSettings,
       logout,
       navigateToLogin,
-      checkAppState${
-        includeProtectedLogic ? ", redirectToLogin, isProtectedPage" : ""
-      }
+      checkAppState,
+      setUser
     }}>
       {children}
     </AuthContext.Provider>
@@ -146,64 +145,32 @@ ${includeProtectedLogic ? protectedLogic : ""}
 `;
 }
 
-function findAuthContextFiles(dir) {
-  const results = [];
-  const files = fs.readdirSync(dir);
-  for (const file of files) {
-    const fullPath = path.join(dir, file);
-    const stat = fs.statSync(fullPath);
-    if (stat.isDirectory()) {
-      results.push(...findAuthContextFiles(fullPath));
-    } else if (/AuthContext\.(js|jsx|ts|tsx)$/.test(file)) {
-      results.push(fullPath);
-    }
-  }
-  return results;
-}
+// --------------------------------------------
+// Script main logic
+// --------------------------------------------
 
-const foundFiles = findAuthContextFiles(srcPath);
-if (foundFiles.length === 0) {
-  console.error("❌ Không tìm thấy file AuthContext trong src/");
+// Check if target file exists
+if (!fs.existsSync(targetFile)) {
+  console.error(`❌ File not found: ${targetFile}`);
   process.exit(1);
 }
 
-let replacedCount = 0;
+// Read file content
+let code = fs.readFileSync(targetFile, "utf8");
 
-for (const filePath of foundFiles) {
-  let code = fs.readFileSync(filePath, "utf8");
-  if (!regex.test(code)) continue;
-
-  const hasProtectedPages = /PROTECTED_PAGES/.test(code);
-  const hasRouterImport = /from\s+["']react-router-dom["']/.test(code);
-  const hasFullRouterImport =
-    /import\s*\{\s*[^}]*useNavigate[^}]*useLocation[^}]*\}\s*from\s*["']react-router-dom["']/.test(
-      code
-    );
-
-  const newCodeBlock = buildNewAuthProvider(hasProtectedPages).trim();
-  let newCode = code.replace(regex, newCodeBlock);
-
-  if (!hasRouterImport) {
-    newCode = `import { useNavigate, useLocation } from "react-router-dom";\n${newCode}`;
-  } else if (hasRouterImport && !hasFullRouterImport) {
-    newCode = newCode.replace(
-      /(import\s*\{)([^}]*)(\}\s*from\s*["']react-router-dom["'])/,
-      (match, p1, p2, p3) => {
-        const existingHooks = p2.split(",").map((h) => h.trim());
-        const missingHooks = ["useNavigate", "useLocation"].filter(
-          (hook) => !existingHooks.includes(hook)
-        );
-        return `${p1} ${[...existingHooks, ...missingHooks].join(", ")} ${p3}`;
-      }
-    );
-  }
-
-  fs.writeFileSync(filePath, newCode, "utf8");
-  replacedCount++;
-  console.log(
-    `✅ Updated: ${path.relative(
-      projectRoot,
-      filePath
-    )} (PROTECTED_PAGES: ${hasProtectedPages})`
-  );
+// Ensure AuthProvider block exists before replacing
+if (!regex.test(code)) {
+  console.error("⚠️ No AuthProvider block found — skipping update.");
+  process.exit(0);
 }
+
+// Replace the AuthProvider implementation
+const newCode = code.replace(regex, buildNewAuthProvider().trim());
+
+// Write the updated file
+fs.writeFileSync(targetFile, newCode, "utf8");
+
+// Success log
+console.log(
+  `✅ Updated AuthProvider in ${path.relative(projectRoot, targetFile)}`
+);
