@@ -5,10 +5,12 @@ import "./auth-sdk/index";
 serve -c serve.json
 
 //run scripts
-node replace-login-handler.js
+node scripts/replace-login-handler.js
+
+node scripts/replace-app-handler.js
 
 node scripts/append-meta.js \
-  --api="http://192.168.10.88:8082/base44-tools/sync-meta-tags" \
+  --api="https://base44-core-api.leveragehero.net/base44-tools/sync-meta-tags" \
   --url="https://show-star-copy-d3002d4e.base44.app" \
-  --project_key="11111" \
+  --project_key="68dcdf1b1fa9a01f4c91fef1" \
   --target="./index.html"
