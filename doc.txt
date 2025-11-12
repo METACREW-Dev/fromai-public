@@ -6,3 +6,9 @@ serve -c serve.json
 
 //run scripts
 node replace-login-handler.js
+
+node scripts/append-meta.js \
+  --api="http://192.168.10.88:8082/base44-tools/sync-meta-tags" \
+  --url="https://show-star-copy-d3002d4e.base44.app" \
+  --project_key="11111" \
+  --target="./index.html"
