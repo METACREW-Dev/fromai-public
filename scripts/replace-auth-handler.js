@@ -80,10 +80,13 @@ function buildNewAuthProvider() {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
-      const res = await base44.auth.me();
-      setUser(res?.data || null);
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
+      if (currentUser?.user_email) {
+        localStorage.setItem('auth_user_email', currentUser?.user_email);
+      }
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
@@ -101,7 +104,7 @@ function buildNewAuthProvider() {
   const logout = (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
-    
+    localStorage.removeItem('access_token');
     if (shouldRedirect) {
       // Use the SDK's logout method which handles token cleanup and redirect
       base44.auth.logout(window.location.href);
