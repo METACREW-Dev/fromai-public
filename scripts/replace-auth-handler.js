@@ -31,15 +31,6 @@ function buildNewAuthProvider() {
       try {
         const token = localStorage.getItem("access_token");
         if (!token) {
-          const currentPath = location.pathname.toLowerCase();
-          const isPrivate = Object.keys(PRIVATE_PAGES)
-            .map(k => \`/\${k.toLowerCase()}\`)
-            .some((p) => currentPath.startsWith(p));
-  
-          if (isPrivate) {
-            navigate("/signin", { replace: true });
-          }
-  
           setIsAuthenticated(false);
           setIsLoadingAuth(false);
           return;

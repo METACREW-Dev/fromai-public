@@ -21,8 +21,12 @@ const newLogic = `
     // Login with Base44 authentication using email and password
     const response = await base44.auth.loginViaEmailPassword(formData.email, formData.password);
     
+    const mainUser = response?.user;
     if (response?.token) {
       localStorage.setItem('access_token', response.token);
+    }
+    if (mainUser) {
+        await login(mainUser);
     }
     
     window.location.href = "/";
