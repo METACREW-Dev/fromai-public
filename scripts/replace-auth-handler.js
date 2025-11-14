@@ -87,6 +87,9 @@ function buildNewAuthProvider() {
       if (currentUser?.user_email) {
         localStorage.setItem('auth_user_email', currentUser?.user_email);
       }
+      if (currentUser?.id) {
+        localStorage.setItem('auth_user_id', currentUser?.id);
+      }
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
