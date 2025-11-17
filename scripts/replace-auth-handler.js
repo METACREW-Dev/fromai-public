@@ -6,9 +6,34 @@ const projectRoot = process.cwd();
 
 const targetDir = path.join(projectRoot, "src/lib");
 const targetFile = path.join(targetDir, "AuthContext.jsx");
+const appParamsFile = path.join(targetDir, "app-params.js");
 
 const regex =
   /export\s+const\s+AuthProvider\s*=\s*\(\{\s*children\s*\}\)\s*=>\s*\{[\s\S]*?\n\};/m;
+
+  // Function to read app-params.js and replace all occurrences of "base44" with "base"
+function replaceTextInAppParamsFile() {
+  if (!fs.existsSync(appParamsFile)) {
+    console.error(`❌ File not found: ${appParamsFile}`);
+    return;
+  }
+  let fileContent = fs.readFileSync(appParamsFile, "utf8");
+  const replacedContent = fileContent.replace(/base44_/g, "base_");
+  // Write back only if modifications were made
+  if (fileContent !== replacedContent) {
+    fs.writeFileSync(appParamsFile, replacedContent, "utf8");
+    console.log(
+      `✅ Replaced all "base44" with "base" in ${path.relative(projectRoot, appParamsFile)}`
+    );
+  } else {
+    console.log(
+      `ℹ️ No "base44" text found in ${path.relative(projectRoot, appParamsFile)}`
+    );
+  }
+}
+
+// Replace in app-params.js
+replaceTextInAppParamsFile();
 
 // New AuthProvider code block to inject
 function buildNewAuthProvider() {
