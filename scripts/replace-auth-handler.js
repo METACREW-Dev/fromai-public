@@ -100,6 +100,7 @@ function buildNewAuthProvider() {
           type: 'auth_required',
           message: 'Authentication required'
         });
+        localStorage.clear();
       }
     }
   };
