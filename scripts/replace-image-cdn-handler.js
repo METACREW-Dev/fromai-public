@@ -16,7 +16,6 @@ const KEYWORD_TO_FIND = 'public/base44-prod';
 const SOURCE_DIRECTORY = './src';
 const FILE_EXTENSIONS = ['.tsx', '.jsx'];
 
-
 // --- END CONFIGURATION ---
 
 // Array to store all log entries for a summary table
@@ -53,6 +52,13 @@ function addLogEntry(file, status, originalSrc, newSrc = '', notes = '') {
  * @returns {Promise<{newUrl: string|null, error: string|null}>}
  */
 async function getNewUrlFromApi(oldUrl) {
+  if (!API_URL || !PROJECT_KEY) {
+    const errorMsg = 'API_URL or PROJECT_KEY is not defined. Set them via CLI args.';
+    console.error(`[FATAL ERROR] ${errorMsg}`);
+    addLogEntry('GLOBAL', 'API_ERROR', oldUrl, '', errorMsg);
+    process.exit(1); 
+  }
+
   const requestUrl = `${API_URL}?oldUrl=${encodeURIComponent(oldUrl)}&projectKey=${PROJECT_KEY}`;
   
   try {
@@ -89,39 +95,63 @@ async function processFile(filePath) {
   }
   
   let contentChanged = false;
-  const regex = /<img[^>]+src="([^"]+)"/g;
+  
+  // **MAIN CHANGE:**
+  // This regex finds all URL-like strings:
+  // (http://... | https://... | /... | ../...)
+  // It stops at whitespace or quote characters ( ' " ` )
+  const regex = /(https?:\/\/[^\s"'`]+|(?:\/|\.\.\/)[^\s"'`]+)/g;
   
   const matches = Array.from(content.matchAll(regex));
   if (matches.length === 0) {
-    return; // No img tag found, skip
+    return; // No links found, skip
   }
 
+  // Step 1: Collect all *unique* URLs containing the keyword
+  const uniqueUrlsToProcess = new Set();
   for (const match of matches) {
-    const fullImgTag = match[0];
-    const originalSrc = match[1];
-
-    if (originalSrc.includes(KEYWORD_TO_FIND)) {
-
-      const { newUrl, error } = await getNewUrlFromApi(originalSrc);
-
-      if (newUrl) {
-        if (newUrl !== originalSrc) {
-          const newImgTag = fullImgTag.replace(originalSrc, newUrl);
-          content = content.replace(fullImgTag, newImgTag);
-          contentChanged = true;
-          addLogEntry(filePath, 'SUCCESS', originalSrc, newUrl);
-        } else {
-          addLogEntry(filePath, 'SKIPPED', originalSrc, newUrl, 'New link is same as old');
-        }
-      } else {
-        addLogEntry(filePath, 'API_ERROR', originalSrc, '', error);
-      }
+    const originalUrl = match[0];
+    if (originalUrl.includes(KEYWORD_TO_FIND)) {
+      uniqueUrlsToProcess.add(originalUrl);
     }
   }
 
+  if (uniqueUrlsToProcess.size === 0) {
+    return; // No links containing the keyword found, skip
+  }
+
+  // Step 2: Call API for each unique URL
+  const replacements = new Map(); // Store map <oldUrl, newUrl>
+  
+  for (const originalUrl of uniqueUrlsToProcess) {
+    const { newUrl, error } = await getNewUrlFromApi(originalUrl);
+
+    if (newUrl) {
+      if (newUrl !== originalUrl) {
+        replacements.set(originalUrl, newUrl);
+        contentChanged = true;
+        addLogEntry(filePath, 'SUCCESS', originalUrl, newUrl);
+      } else {
+        addLogEntry(filePath, 'SKIPPED', originalUrl, originalUrl, 'New link is same as old');
+      }
+    } else {
+      addLogEntry(filePath, 'API_ERROR', originalUrl, '', error || 'Unknown API error');
+    }
+  }
+
+  // Step 3: If there are changes, apply all and write to file
   if (contentChanged) {
+    let newContent = content;
+    
+    // Apply replacements
+    // Use split/join to safely replace all occurrences
+    // and avoid regex issues with special characters in URLs
+    for (const [originalUrl, newUrl] of replacements.entries()) {
+      newContent = newContent.split(originalUrl).join(newUrl);
+    }
+    
     try {
-      await fs.writeFile(filePath, content, 'utf8');
+      await fs.writeFile(filePath, newContent, 'utf8');
     } catch (writeError) {
       addLogEntry(filePath, 'FILE_ERROR', '', '', `Cannot write file: ${writeError.message}`);
     }
@@ -157,15 +187,26 @@ async function scanDirectory(dir) {
  * Main runner function
  */
 async function main() {
-  logProgress('=== STARTING SRC REPLACEMENT SCRIPT ===');
+  logProgress('=== STARTING URL REPLACEMENT SCRIPT ===');
+  
+  if (!API_URL || !PROJECT_KEY) {
+    logProgress('[ERROR] Missing required arguments: --api=<URL> and --project=<KEY> are required.');
+    logProgress('Example: node script.js --api="https://api.example.com/getUrl" --project="my-project"');
+    return;
+  }
+  
+  logProgress(`Scanning directory: ${SOURCE_DIRECTORY}`);
+  logProgress(`Looking for keyword: ${KEYWORD_TO_FIND}`);
+  
   await scanDirectory(SOURCE_DIRECTORY);
+  
   // 1. Print summary table to console
   if (logEntries.length > 0) {
     console.log('\n\n--- SUMMARY OF CHANGES ---');
     console.table(logEntries);
     console.log('------------------------------\n');
   } else {
-   logProgress('No links to update found.');
+   logProgress('No links containing the keyword were found.');
   }
   
   logProgress('=== END OF SCRIPT ===');
