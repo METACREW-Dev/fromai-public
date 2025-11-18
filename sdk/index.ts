@@ -131,7 +131,7 @@ function objectToFormData(
 
 // ================== http ==================
 function createHttp(cfg: ClientConfig) {
-  const fetchImpl = cfg.fetchImpl ?? fetch;
+  const fetchImpl: any = cfg.fetchImpl ?? fetch;
   const storageKey = cfg.storageKey ?? "access_token";
   let token =
     cfg.token ??
@@ -181,7 +181,7 @@ function createHttp(cfg: ClientConfig) {
     if (looksJson) {
       try {
         data = text ? JSON.parse(text) : undefined;
-      } catch {}
+      } catch { }
     }
 
     if (!res.ok) {
@@ -259,10 +259,10 @@ function createDynamicModule(
 
           const opts: RequestInit & { query?: Record<string, any> } = isPost
             ? {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(firstArg ?? {}),
-              }
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(firstArg ?? {}),
+            }
             : { method: "GET", query: firstArg };
 
           return http.request(`${basePath}/${encodeURIComponent(name)}`, opts);
@@ -325,10 +325,10 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     if (isFileLike(data) || hasFileLikeDeep(data)) {
                       const fd = isFileLike(data)
                         ? (() => {
-                            const f = new FormData();
-                            f.append("file", data);
-                            return f;
-                          })()
+                          const f = new FormData();
+                          f.append("file", data);
+                          return f;
+                        })()
                         : objectToFormData(data);
                       return http.request(`${entity}`, {
                         method: "POST",
@@ -353,10 +353,10 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     if (isFileLike(data) || hasFileLikeDeep(data)) {
                       const fd = isFileLike(data)
                         ? (() => {
-                            const f = new FormData();
-                            f.append("file", data);
-                            return f;
-                          })()
+                          const f = new FormData();
+                          f.append("file", data);
+                          return f;
+                        })()
                         : objectToFormData(data);
                       return http.request(
                         `${entity}/${encodeURIComponent(id)}`,
@@ -489,8 +489,7 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
             case "login": {
               const nextUrl = args[0];
               const url = new URL(
-                `auth/login${
-                  nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : ""
+                `auth/login${nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : ""
                 }`,
                 ensureBase(cfg.serverUrl)
               ).toString();
@@ -569,10 +568,10 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
               const payload =
                 typeof args[0] === "string" && typeof args[1] === "string"
                   ? {
-                      email: args[0],
-                      password: args[1],
-                      turnstile_token: args[2],
-                    }
+                    email: args[0],
+                    password: args[1],
+                    turnstile_token: args[2],
+                  }
                   : args[0];
 
               const res = await http.request("auth/login", {
@@ -664,7 +663,7 @@ function createAsServiceRole(
     functions: createDynamicModule("functions", serviceHttp),
     agents: createDynamicModule("agents", serviceHttp),
     appLogs: createDynamicModule("appLogs", serviceHttp),
-    cleanup: () => {},
+    cleanup: () => { },
   };
 }
 
