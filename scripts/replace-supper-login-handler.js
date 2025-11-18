@@ -8,12 +8,21 @@ const targetFiles = ["src/pages/SuperAdmin_Login.jsx", "src/pages/SuperAdmin_Sig
 const replacements = {
   checkIfAlreadyLoggedIn: `const checkIfAlreadyLoggedIn = async () => {
     const accessToken = localStorage.getItem("access_token");
-    if (accessToken) {
+    const superAdminSession = localStorage.getItem("superAdminSession");
+    if (accessToken && superAdminSession) {
       try {
-        const currentUser = await base44.auth.me();
-        if (currentUser?.role === "admin") {
+        const mainUser = await base44.auth.me();
+        if (mainUser?.role === "admin") {
+          const session = {
+            email: mainUser.email,
+            full_name: mainUser.full_name,
+            loginTime: new Date().toISOString()
+          };
+          localStorage.setItem("superAdminSession", JSON.stringify(session));
           navigate(createPageUrl("SuperAdmin_Dashboard"));
         } else {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("superAdminSession");
           navigate(createPageUrl("SuperAdmin_Login"));
         }
       } catch (e) {
