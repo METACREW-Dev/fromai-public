@@ -3,7 +3,7 @@ export interface ClientConfig {
   serverUrl: string;
   token?: string;
   storageKey?: string;
-  fetchImpl?: typeof fetch;
+  fetchImpl?: any; // typeof fetch;
 }
 
 export interface Entity {
