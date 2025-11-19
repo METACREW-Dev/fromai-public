@@ -63,7 +63,7 @@ export default function RegisterInfoBasePage() {
       }
       const user = await base44.auth.updateMe(mainUserData);
       setIsLoading(false);
-      navigate(createPageUrl(""));
+      window.location.href = "/";
 
     } catch (error) {
       console.error("Register error:", error);
