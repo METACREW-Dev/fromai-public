@@ -6,6 +6,7 @@ serve -c serve.json
 
 //run scripts
 node scripts/replace-login-handler.js
+node scripts/replace-register-handler.js
 node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
