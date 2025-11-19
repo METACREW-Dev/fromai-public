@@ -63,17 +63,7 @@ export default function RegisterInfoBasePage() {
       }
       const user = await base44.auth.updateMe(mainUserData);
       setIsLoading(false);
-      if (user_type === "business") {
-        setError("회원가입이 완료되었습니다! 관리자 승인 후 이용하실 수 있습니다. 승인 완료 시 이메일로 안내드립니다.");
-        setTimeout(() => navigate(createPageUrl("SignIn")), 2000);
-      } else {
-        setError("회원가입이 완료되었습니다!");
-        toast({
-          title: "지원서 저장 완료!",
-          description: "방금 제출한 지원서가 안전하게 저장되었어요!",
-        });
-        setTimeout(() => navigate(createPageUrl("MyApplications")), 1500);
-      }
+      navigate(createPageUrl(""));
 
     } catch (error) {
       console.error("Register error:", error);
