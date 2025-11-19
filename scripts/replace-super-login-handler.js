@@ -115,6 +115,8 @@ for (const relativePath of targetFiles) {
     }
 
     content = result.content;
+    // Log when replace function thành công (successful replacement)
+    console.log(`✅ Replaced function ${funcName} in ${relativePath}`);
   }
 
   fs.writeFileSync(filePath, content, "utf8");
