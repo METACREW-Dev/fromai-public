@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, ArrowRight, Briefcase, Building2, Loader2, UserCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Briefcase, Building2, Loader2, UserCircle2, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -177,7 +177,10 @@ export default function RegisterInfoBasePage() {
                 </div>
               </div>
             )}
-
+            {error && <div className="mb-4 p-3 rounded-lg flex items-start gap-2 bg-red-500/10 border border-red-500/30">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-400" />
+              <p className="text-sm whitespace-pre-line text-red-300">{error}</p>
+            </div>}
             {currentStep === 1 && (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
