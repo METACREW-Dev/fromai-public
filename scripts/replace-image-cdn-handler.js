@@ -11,7 +11,7 @@ const args = Object.fromEntries(
   })
 );
 const API_URL = args?.api || args["api-url"] || null;
-const PROJECT_KEY = args?.project || args?.project_key || null;
+// const PROJECT_KEY = args?.project || args?.project_key || null;
 const KEYWORD_TO_FIND = 'public/base44-prod';
 const SOURCE_DIRECTORY = './src';
 const FILE_EXTENSIONS = ['.tsx', '.jsx'];
@@ -52,25 +52,33 @@ function addLogEntry(file, status, originalSrc, newSrc = '', notes = '') {
  * @returns {Promise<{newUrl: string|null, error: string|null}>}
  */
 async function getNewUrlFromApi(oldUrl) {
-  if (!API_URL || !PROJECT_KEY) {
-    const errorMsg = 'API_URL or PROJECT_KEY is not defined. Set them via CLI args.';
+  if (!API_URL) {
+    const errorMsg = 'API_URL is not defined. Set them via CLI args.';
     console.error(`[FATAL ERROR] ${errorMsg}`);
     addLogEntry('GLOBAL', 'API_ERROR', oldUrl, '', errorMsg);
     process.exit(1); 
   }
 
-  const requestUrl = `${API_URL}?oldUrl=${encodeURIComponent(oldUrl)}&projectKey=${PROJECT_KEY}`;
+  const requestUrl = `${API_URL}`;
   
   try {
-    const response = await fetch(requestUrl);
+    const response = await fetch(requestUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: oldUrl,
+      }),
+    });
     if (!response.ok) {
       throw new Error(`API returned status ${response.status}`);
     }
     
     const data = await response.json();
     
-    if (data && data.newUrl) {
-      return { newUrl: data.newUrl, error: null };
+    if (data && data.cdn_url) {
+      return { newUrl: data.cdn_url, error: null };
     } else {
       throw new Error('API response does not contain newUrl');
     }
@@ -189,8 +197,8 @@ async function scanDirectory(dir) {
 async function main() {
   logProgress('=== STARTING URL REPLACEMENT SCRIPT ===');
   
-  if (!API_URL || !PROJECT_KEY) {
-    logProgress('[ERROR] Missing required arguments: --api=<URL> and --project=<KEY> are required.');
+  if (!API_URL) {
+    logProgress('[ERROR] Missing required arguments: --api=<URL> are required.');
     logProgress('Example: node script.js --api="https://api.example.com/getUrl" --project="my-project"');
     return;
   }
