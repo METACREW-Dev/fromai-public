@@ -75,10 +75,9 @@ async function getNewUrlFromApi(oldUrl) {
       throw new Error(`API returned status ${response.status}`);
     }
     
-    const data = await response.json();
-    
-    if (data && data.cdn_url) {
-      return { newUrl: data.cdn_url, error: null };
+    const res = await response.json();
+    if (res?.data && res?.data?.cdn_url) {
+      return { newUrl: res?.data?.cdn_url, error: null };
     } else {
       throw new Error('API response does not contain newUrl');
     }
