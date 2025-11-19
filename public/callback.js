@@ -95,7 +95,7 @@ export async function handleSocialCallback() {
           "*"
         );
         // window.opener.location.href = "/";
-        window.opener.location.href = (String(window.opener.location?.origin)?.includes("showstar") && (!result?.data?.user?.business_type)) ? window.opener.location.href : "/";
+        window.opener.location.href = (String(window.opener.location?.origin)?.includes("showstar") && (!result?.data?.user?.user_type)) ? "/RegisterInfoBase" : "/";
         showSuccess("✅ 로그인 성공! 잠시 후 창이 닫힙니다...");
         setTimeout(() => window.close(), 1000);
       } catch (err) {
