@@ -161,18 +161,6 @@ export default function RegisterInfoBasePage() {
                 </div>
               </button>
             </div>
-
-            <div className="mt-6 text-center">
-              <p className="text-slate-400 text-sm">
-                이미 계정이 있으신가요?{" "}
-                <Link
-                  to={createPageUrl("SignIn")}
-                  className="text-purple-400 hover:text-purple-300 font-semibold"
-                >
-                  로그인
-                </Link>
-              </p>
-            </div>
           </div>
         )}
 
@@ -271,20 +259,6 @@ export default function RegisterInfoBasePage() {
                   </Button>
                 </div>
               </form>
-            )}
-
-            {currentStep > 0 && (
-              <div className="mt-5 text-center">
-                <p className="text-gray-300 text-sm">
-                  이미 계정이 있으신가요?{" "}
-                  <Link
-                    to={createPageUrl("SignIn")}
-                    className="text-purple-400 hover:text-purple-300 font-semibold"
-                  >
-                    로그인
-                  </Link>
-                </p>
-              </div>
             )}
           </div>
         )}
