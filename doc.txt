@@ -10,7 +10,7 @@ node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
 // only showstar
-node scripts/replace-supper-login-handler.js
+node scripts/replace-super-login-handler.js
 
 node scripts/append-meta.js \
   --api="https://base44-core-api.leveragehero.net/base44-tools/sync-meta-tags" \
