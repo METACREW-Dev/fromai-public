@@ -181,16 +181,18 @@
         <h3>1. Tạo các Handlers (Bắt buộc)</h3>
         <div class="code-block">
             node scripts/replace-login-handler.js<br>
-            node scripts/replace-register-handler.js<br>
             node scripts/replace-auth-handler.js<br>
             node scripts/replace-app-handler.js
         </div>
 
-        <h3>2. Cấu hình Super Admin <span class="badge">Chỉ dự án Showstar</span></h3>
+        <h3>2. Cấu hình Register Info, Super Admin <span class="badge">Chỉ dự án Showstar</span></h3>
         <div class="note">
             <strong>Lưu ý:</strong> Bước này chỉ dành riêng cho dự án Showstar.
         </div>
-        <div class="code-block">node scripts/replace-super-login-handler.js</div>
+        <div class="code-block">
+            node scripts/replace-register-handler.js<br>
+            node scripts/replace-super-login-handler.js
+        </div>
 
         <h3>3. Tự động tạo thẻ Meta</h3>
         <div class="code-block">
