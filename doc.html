@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Tích Hợp Project</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --border-color: #e2e8f0;
+            --accent-color: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #1e293b;
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background-color: var(--primary-color);
+            margin-right: 12px;
+            border-radius: 4px;
+        }
+
+        h3 {
+            color: #475569;
+            margin-top: 25px;
+            font-size: 1.1rem;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        li::before {
+            content: "•";
+            color: var(--primary-color);
+            font-weight: bold;
+            position: absolute;
+            left: 5px;
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+            margin: 10px 0;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .note {
+            background-color: #fff7ed;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin: 15px 0;
+            color: #9a3412;
+            border-radius: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            margin-left: 10px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        code {
+            background-color: #f1f5f9;
+            color: #d946ef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Hướng Dẫn Tích Hợp SDK & Cấu Hình</h1>
+        <p>Tài liệu hướng dẫn chi tiết các bước sao chép tài nguyên, cấu hình môi trường và chạy script tự động.</p>
+
+        <h2>I. Chuẩn bị File và Thư mục</h2>
+
+        <h3>1. Sao chép tài nguyên vào Root</h3>
+        <p>Copy các thư mục và file sau vào thư mục gốc của dự án (cùng cấp với folder <code>src</code>):</p>
+        <ul>
+            <li>📂 <strong>public</strong></li>
+            <li>📂 <strong>scripts</strong></li>
+            <li>📂 <strong>sdk</strong></li>
+            <li>📄 <strong>serve.json</strong></li>
+        </ul>
+
+        <h3>2. Sao chép Auth SDK</h3>
+        <p>Copy thư mục <code>auth-sdk</code> vào bên trong thư mục source code:</p>
+        <ul>
+            <li>Đích đến: <code>src/auth-sdk</code></li>
+        </ul>
+
+        <h3>3. Cấu hình biến môi trường</h3>
+        <p>Copy file <code>.env.example</code> vào local, đổi tên thành <code>.env</code> và cập nhật thông tin theo
+            project.</p>
+
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+
+        <h2>II. Cấu hình Code</h2>
+
+        <h3>1. Import SDK</h3>
+        <p>Thêm dòng sau vào file <code>src/main.jsx</code>:</p>
+        <div class="code-block">import "./auth-sdk/index";</div>
+
+        <h3>2. Cập nhật API Client</h3>
+        <p>Thay thế <strong>toàn bộ</strong> nội dung file <code>src/api/base44Client.js</code> bằng nội dung từ file
+            mẫu được cung cấp.</p>
+
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+
+        <h2>III. Chạy Scripts Tự động hóa</h2>
+        <p>Mở Terminal tại thư mục gốc và chạy các lệnh sau:</p>
+
+        <h3>1. Tạo các Handlers (Bắt buộc)</h3>
+        <div class="code-block">
+            node scripts/replace-login-handler.js<br>
+            node scripts/replace-register-handler.js<br>
+            node scripts/replace-auth-handler.js<br>
+            node scripts/replace-app-handler.js
+        </div>
+
+        <h3>2. Cấu hình Super Admin <span class="badge">Chỉ dự án Showstar</span></h3>
+        <div class="note">
+            <strong>Lưu ý:</strong> Bước này chỉ dành riêng cho dự án Showstar.
+        </div>
+        <div class="code-block">node scripts/replace-super-login-handler.js</div>
+
+        <h3>3. Tự động tạo thẻ Meta</h3>
+        <div class="code-block">
+            node scripts/append-meta.js \<br>
+            &nbsp;&nbsp;--api="https://base44-core-api.leveragehero.net/base44-tools/sync-meta-tags" \<br>
+            &nbsp;&nbsp;--url="https://show-star-copy-d3002d4e.base44.app" \<br>
+            &nbsp;&nbsp;--project_key="68dcdf1b1fa9a01f4c91fef1" \<br>
+            &nbsp;&nbsp;--target="./index.html"
+        </div>
+
+        <h3>4. Chuyển đổi ảnh sang CDN</h3>
+        <div class="code-block">
+            node scripts/replace-image-cdn-handler.js \<br>
+            &nbsp;&nbsp;--api="https://dev2-showstar-api.leveragehero.net/base44-tools/sync-file"
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+
+        <h2>IV. Kiểm thử (Testing)</h2>
+        <p>Để test tính năng Login SNS, chạy server bằng lệnh:</p>
+        <div class="code-block">serve -c serve.json</div>
+
+        <footer>
+            Generated for Base44 Project Integration
+        </footer>
+    </div>
+
+</body>
+
+</html>
