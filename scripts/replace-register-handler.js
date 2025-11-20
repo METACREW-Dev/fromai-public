@@ -63,8 +63,19 @@ export default function RegisterInfoBasePage() {
       }
       const user = await base44.auth.updateMe(mainUserData);
       setIsLoading(false);
-      window.location.href = "/";
-
+      if (user_type === "business") {
+        toast({
+          title: "회원가입 완료!",
+          description: "회원가입이 완료되었습니다! 관리자 승인 후 이용하실 수 있습니다. 승인 완료 시 이메일로 안내드립니다.",
+        });
+      } else {
+        toast({
+          title: "지원서 저장 완료!",
+          description: "방금 제출한 지원서가 안전하게 저장되었어요!",
+        });
+      }
+      setTimeout(() => { window.location.href = "/";}, 2000);
+      
     } catch (error) {
       console.error("Register error:", error);
       let errorMessage = "회원가입 중 오류가 발생했습니다.";
