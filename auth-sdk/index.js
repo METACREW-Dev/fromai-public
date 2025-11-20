@@ -4,9 +4,12 @@ class SocialAuthSDK {
     this.providers = ['google', 'kakao', 'facebook', 'naver', 'apple'];
     this.maxAttempts = 500;
     this.attemptCount = 0;
+    this.observer = null;
   }
 
   init() {
+    this.setupDelegatedClicks();
+    this.setupMutationObserver();
     this.waitForReactRoot();
   }
 
@@ -17,7 +20,6 @@ class SocialAuthSDK {
       this.attemptCount++;
 
       if (hasButton) {
-        this.setupDelegatedClicks();
         return;
       }
 
@@ -36,16 +38,84 @@ class SocialAuthSDK {
     if (this._delegationBound) return;
     this._delegationBound = true;
 
-    document.addEventListener('click', (e) => {
+    this.clickHandler = (e) => {
       const target = e.target.closest('button[id^="login-"]');
       if (!target) return;
 
       e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
       const provider = target.id.replace('login-', '');
       if (!this.providers.includes(provider)) return;
 
+      console.log('[SDK] Login button clicked:', provider);
       this.login(provider);
+    };
+
+    document.addEventListener('click', this.clickHandler, true);
+  }
+
+  verifyButtons() {
+    const root = document.getElementById('root');
+    const buttons = root?.querySelectorAll('button[id^="login-"]');
+    if (buttons && buttons.length > 0) {
+      console.log(`[SDK] Found ${buttons.length} login button(s), event delegation is active.`);
+      return true;
+    }
+    return false;
+  }
+
+  setupMutationObserver() {
+    if (this.observer) return;
+    
+    const root = document.getElementById('root');
+    if (!root) {
+      setTimeout(() => this.setupMutationObserver(), 100);
+      return;
+    }
+
+    this.observer = new MutationObserver((mutations) => {
+      let hasLoginButton = false;
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          hasLoginButton = Array.from(mutation.addedNodes).some(
+            (node) => node.nodeType === 1 && (
+              node.matches?.('button[id^="login-"]') ||
+              node.querySelector?.('button[id^="login-"]')
+            )
+          );
+          if (hasLoginButton) break;
+        }
+      }
+      
+      if (hasLoginButton) {
+        this.verifyEventDelegation();
+      }
     });
+
+    this.observer.observe(root, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  verifyEventDelegation() {
+    if (!this._delegationBound) {
+      console.warn('[SDK] Event delegation not bound, re-initializing...');
+      this.setupDelegatedClicks();
+    }
+  }
+
+  destroy() {
+    if (this.observer) {
+      this.observer.disconnect();
+      this.observer = null;
+    }
+    if (this._delegationBound && this.clickHandler) {
+      document.removeEventListener('click', this.clickHandler, true);
+      this._delegationBound = false;
+      this.clickHandler = null;
+    }
   }
 
   async login(provider) {
