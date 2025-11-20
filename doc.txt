@@ -1,23 +1,33 @@
-// add import => src/main.jsx 
+// copy tất cả các thư mục: [public, scripts, serve.json, sdk ] vào project ở local và cùng cấp với thư mục src ở local.
+// copy tất cả các thư mục: [auth-sdk] vào project ở local và nằm trong thư mục src ở local.
+
+// thêm dòng import bên dưới vào file:  src/main.jsx 
 import "./auth-sdk/index"; 
 
-//start
+// thay đổi tất cả nội dung trong file api/base44Client.js  vào source của project ở đang chạy ở local : src/api/base44Client.js
+
+
+//start nếu muốn test login SNS
 serve -c serve.json
 
-//run scripts
+//run scripts để auto tạo các file trong source 
 node scripts/replace-login-handler.js
 node scripts/replace-register-handler.js
 node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
-// only showstar
+// chỉ dành riêng cho dự án showstar để cấu hình cho super admin
 node scripts/replace-super-login-handler.js
 
+
+// tạo tự động các thẻ meta của project
 node scripts/append-meta.js \
   --api="https://base44-core-api.leveragehero.net/base44-tools/sync-meta-tags" \
   --url="https://show-star-copy-d3002d4e.base44.app" \
   --project_key="68dcdf1b1fa9a01f4c91fef1" \
   --target="./index.html"
 
+
+// chạy để auto thay đổi các ảnh sang cdn của bên mình 
 node scripts/replace-image-cdn-handler.js \
 --api="https://dev2-showstar-api.leveragehero.net/base44-tools/sync-file"
