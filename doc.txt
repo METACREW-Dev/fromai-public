@@ -1,26 +1,29 @@
-// copy tất cả các thư mục: [public, scripts, serve.json, sdk ] vào project ở local và cùng cấp với thư mục src ở local.
-// copy tất cả các thư mục: [auth-sdk] vào project ở local và nằm trong thư mục src ở local.
+/Bước 1/ copy tất cả các thư mục: [public, scripts, serve.json, sdk ] vào project ở local và cùng cấp với thư mục src ở local.
 
-// thêm dòng import bên dưới vào file:  src/main.jsx 
+/Bước 2/ copy tất cả các thư mục: [auth-sdk] vào project ở local và nằm trong thư mục src ở local.
+
+/Bước 3/ copy file .env.example vào trong source ở local và thay thông tin theo từng project
+
+/Bước 4/ thêm dòng import bên dưới vào file:  src/main.jsx 
 import "./auth-sdk/index"; 
 
-// thay đổi tất cả nội dung trong file api/base44Client.js  vào source của project ở đang chạy ở local : src/api/base44Client.js
+/Bước 5/ thay đổi tất cả nội dung trong file api/base44Client.js  vào source của project ở đang chạy ở local : src/api/base44Client.js
 
 
-//start nếu muốn test login SNS
+/Bước 6/ start nếu muốn test login SNS
 serve -c serve.json
 
-//run scripts để auto tạo các file trong source 
+/Bước 7/ run scripts để auto tạo các file trong source 
 node scripts/replace-login-handler.js
 node scripts/replace-register-handler.js
 node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
-// chỉ dành riêng cho dự án showstar để cấu hình cho super admin
+/Bước 8/ chỉ dành riêng cho dự án showstar để cấu hình cho super admin
 node scripts/replace-super-login-handler.js
 
 
-// tạo tự động các thẻ meta của project
+/Bước 9/ tạo tự động các thẻ meta của project
 node scripts/append-meta.js \
   --api="https://base44-core-api.leveragehero.net/base44-tools/sync-meta-tags" \
   --url="https://show-star-copy-d3002d4e.base44.app" \
@@ -28,6 +31,6 @@ node scripts/append-meta.js \
   --target="./index.html"
 
 
-// chạy để auto thay đổi các ảnh sang cdn của bên mình 
+/Bước 10/ chạy để auto thay đổi các ảnh sang cdn của bên mình 
 node scripts/replace-image-cdn-handler.js \
 --api="https://dev2-showstar-api.leveragehero.net/base44-tools/sync-file"
