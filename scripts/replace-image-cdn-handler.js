@@ -11,7 +11,8 @@ const args = Object.fromEntries(
   })
 );
 const API_URL = args?.api || args["api-url"] || null;
-// const PROJECT_KEY = args?.project || args?.project_key || null;
+const PROJECT_KEY = args?.project || args?.project_key || null;
+const ENVIRONMENT = args?.environment || null;
 const KEYWORD_TO_FIND = 'public/base44-prod';
 const SOURCE_DIRECTORY = './src';
 const FILE_EXTENSIONS = ['.tsx', '.jsx'];
@@ -69,6 +70,8 @@ async function getNewUrlFromApi(oldUrl) {
       },
       body: JSON.stringify({
         url: oldUrl,
+        project_key: PROJECT_KEY,
+        environment: ENVIRONMENT,
       }),
     });
     if (!response.ok) {
