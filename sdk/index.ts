@@ -505,10 +505,6 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
               });
 
             case "redirectToHome": {
-              const currentPath = window.location.pathname;
-
-              const homePatterns = /(home|dashboard)/i;
-              if (homePatterns.test(currentPath)) return;
 
               const homePath = "/";
 
