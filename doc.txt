@@ -31,7 +31,7 @@ node scripts/append-meta.js \
   --target="./index.html"
 
 
-/Bước 10/ chạy để auto thay đổi các ảnh sang cdn của bên mình 
+/Bước 10/ chạy để auto thay đổi các ảnh sang cdn của bên mình environment: 'development' or 'production'
 node scripts/replace-image-cdn-handler.js \
 --api="https://dev2-showstar-api.leveragehero.net/base44-tools/sync-file" \
 --project_key="68dcdf1b1fa9a01f4c91fef1" \
