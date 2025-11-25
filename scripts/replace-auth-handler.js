@@ -117,8 +117,6 @@ function buildNewAuthProvider() {
       }
     } catch (error) {
       console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
-      setIsAuthenticated(false);
       // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
         setAuthError({
@@ -127,6 +125,9 @@ function buildNewAuthProvider() {
         });
         localStorage.clear();
         base44.auth.redirectToHome();
+      } else {
+        setIsLoadingAuth(false);
+        setIsAuthenticated(false);
       }
     }
   };
