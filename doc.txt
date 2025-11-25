@@ -14,7 +14,7 @@ import "./auth-sdk/index";
 serve -c serve.json
 
 
-/================= BEGIN:: CÁCH 1 ĐỂ CHẠY GỌN HƠN ================/
+/================= BEGIN:: CÁCH 1 ĐỂ CHẠY SCRIPT ================/
 
 /Bước 7/ run scripts để auto tạo các file trong source 
 node scripts/replace-login-handler.js
@@ -46,7 +46,7 @@ node scripts/replace-image-cdn-handler.js \
 
 
 
-/================= BEGIN::CÁCH 2 ĐỂ CHẠY GỌN HƠN ================/
+/================= BEGIN::CÁCH 2 ĐỂ CHẠY SCRIPT GỌN HƠN ================/
 
 node scripts/index.js \
   --append_meta_endpoint="https://base44-core-api.leveragehero.net/base44-tools/sync-meta-tags" \
