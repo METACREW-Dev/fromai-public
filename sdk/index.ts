@@ -161,6 +161,7 @@ function createHttp(cfg: ClientConfig) {
     init?: RequestInit & { query?: Record<string, any> }
   ) => {
     const url = buildUrl(path, init?.query);
+    const token = (typeof window !== "undefined" ? localStorage.getItem(storageKey) : undefined);
     const res = await fetchImpl(url, {
       ...init,
       headers: {
