@@ -62,9 +62,9 @@ node scripts/index.js \
 
 //Chạy riêng thêm cho từng project//
 
-*Showstar
+[*]Showstar
 node scripts/replace-register-handler.js
 node scripts/replace-super-login-handler.js
 
-*Newsbridgepr
+[*]Newsbridgepr
 node scripts/newsbridgepr/replace-login-handler.js
