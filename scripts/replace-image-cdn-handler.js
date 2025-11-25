@@ -89,6 +89,21 @@ async function getNewUrlFromApi(oldUrl) {
 }
 
 /**
+ * Normalize URL by removing trailing punctuation and closing brackets
+ * This handles cases like url(...), url('...'), url("..."), etc.
+ * @param {string} url - URL string that may contain trailing characters
+ * @returns {string} - Cleaned URL
+ */
+function normalizeUrl(url) {
+  if (!url) {
+    return url;
+  }
+  // Remove trailing closing brackets, commas, semicolons, and quotes
+  // This handles: url(...), url('...'), url("..."), ..., ;, etc.
+  return url.replace(/[),;'"`]+$/, '').trim();
+}
+
+/**
  * Process a single file
  * @param {string} filePath - Path to the file
  */
@@ -107,6 +122,7 @@ async function processFile(filePath) {
   // This regex finds all URL-like strings:
   // (http://... | https://... | /... | ../...)
   // It stops at whitespace or quote characters ( ' " ` )
+  // Note: We'll normalize URLs afterward to remove trailing ), ,, ;, etc.
   const regex = /(https?:\/\/[^\s"'`]+|(?:\/|\.\.\/)[^\s"'`]+)/g;
   
   const matches = Array.from(content.matchAll(regex));
@@ -115,11 +131,21 @@ async function processFile(filePath) {
   }
 
   // Step 1: Collect all *unique* URLs containing the keyword
+  // Map to store normalized URL -> array of original matches for replacement
+  const normalizedToOriginals = new Map(); // <normalizedUrl, Set<originalMatch>>
   const uniqueUrlsToProcess = new Set();
+  
   for (const match of matches) {
-    const originalUrl = match[0];
-    if (originalUrl.includes(KEYWORD_TO_FIND)) {
-      uniqueUrlsToProcess.add(originalUrl);
+    const originalMatch = match[0];
+    const normalizedUrl = normalizeUrl(originalMatch);
+    
+    if (normalizedUrl.includes(KEYWORD_TO_FIND)) {
+      uniqueUrlsToProcess.add(normalizedUrl);
+      // Store all original matches for this normalized URL
+      if (!normalizedToOriginals.has(normalizedUrl)) {
+        normalizedToOriginals.set(normalizedUrl, new Set());
+      }
+      normalizedToOriginals.get(normalizedUrl).add(originalMatch);
     }
   }
 
@@ -127,22 +153,22 @@ async function processFile(filePath) {
     return; // No links containing the keyword found, skip
   }
 
-  // Step 2: Call API for each unique URL
-  const replacements = new Map(); // Store map <oldUrl, newUrl>
+  // Step 2: Call API for each unique normalized URL
+  const normalizedToNewUrl = new Map(); // Store map <normalizedUrl, newUrl>
   
-  for (const originalUrl of uniqueUrlsToProcess) {
-    const { newUrl, error } = await getNewUrlFromApi(originalUrl);
+  for (const normalizedUrl of uniqueUrlsToProcess) {
+    const { newUrl, error } = await getNewUrlFromApi(normalizedUrl);
 
     if (newUrl) {
-      if (newUrl !== originalUrl) {
-        replacements.set(originalUrl, newUrl);
+      if (newUrl !== normalizedUrl) {
+        normalizedToNewUrl.set(normalizedUrl, newUrl);
         contentChanged = true;
-        addLogEntry(filePath, 'SUCCESS', originalUrl, newUrl);
+        addLogEntry(filePath, 'SUCCESS', normalizedUrl, newUrl);
       } else {
-        addLogEntry(filePath, 'SKIPPED', originalUrl, originalUrl, 'New link is same as old');
+        addLogEntry(filePath, 'SKIPPED', normalizedUrl, normalizedUrl, 'New link is same as old');
       }
     } else {
-      addLogEntry(filePath, 'API_ERROR', originalUrl, '', error || 'Unknown API error');
+      addLogEntry(filePath, 'API_ERROR', normalizedUrl, '', error || 'Unknown API error');
     }
   }
 
@@ -151,10 +177,18 @@ async function processFile(filePath) {
     let newContent = content;
     
     // Apply replacements
-    // Use split/join to safely replace all occurrences
-    // and avoid regex issues with special characters in URLs
-    for (const [originalUrl, newUrl] of replacements.entries()) {
-      newContent = newContent.split(originalUrl).join(newUrl);
+    // We need to replace all original matches (which may include trailing ), ,, ;)
+    // with the new URL, preserving the trailing characters if they exist
+    for (const [normalizedUrl, originalMatches] of normalizedToOriginals.entries()) {
+      const newUrl = normalizedToNewUrl.get(normalizedUrl);
+      if (newUrl) {
+        // Replace each original match with new URL + trailing characters
+        for (const originalMatch of originalMatches) {
+          const trailingChars = originalMatch.replace(normalizedUrl, '');
+          const replacement = newUrl + trailingChars;
+          newContent = newContent.split(originalMatch).join(replacement);
+        }
+      }
     }
     
     try {
