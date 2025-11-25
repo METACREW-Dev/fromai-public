@@ -13,14 +13,20 @@ import "./auth-sdk/index";
 /Bước 6/ start nếu muốn test login SNS
 serve -c serve.json
 
+
+/================= BEGIN:: CÁCH 1 ĐỂ CHẠY GỌN HƠN ================/
+
 /Bước 7/ run scripts để auto tạo các file trong source 
 node scripts/replace-login-handler.js
 node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
-/Bước 8/ chỉ dành riêng cho dự án showstar để cấu hình cho register info,  super admin
+/Bước 8:01/ chỉ dành riêng cho dự án showstar để cấu hình cho register info,  super admin
 node scripts/replace-register-handler.js
 node scripts/replace-super-login-handler.js
+
+/Bước 8:02/ chỉ dành riêng cho dự án newsbridgepr để cấu hình cho login
+node scripts/newsbridgepr/replace-login-handler.js
 
 
 /Bước 9/ tạo tự động các thẻ meta của project
@@ -36,3 +42,27 @@ node scripts/replace-image-cdn-handler.js \
 --api="https://dev2-showstar-api.leveragehero.net/base44-tools/sync-file" \
 --project_key="68dcdf1b1fa9a01f4c91fef1" \
 --environment="development"
+
+
+
+
+/================= BEGIN::CÁCH 2 ĐỂ CHẠY GỌN HƠN ================/
+
+node scripts/index.js \
+  --append_meta_endpoint="https://base44-core-api.leveragehero.net/base44-tools/sync-meta-tags" \
+  --append_meta_base44_url="https://show-star-copy-d3002d4e.base44.app" \
+  --append_meta_project_key="68dcdf1b1fa9a01f4c91fef1" \
+  --append_meta_target_file="./index.html" \
+  --replace_cdn_image_api="https://dev2-showstar-api.leveragehero.net/base44-tools/sync-file" \
+  --replace_cdn_image_project_key="68dcdf1b1fa9a01f4c91fef1" \
+  --replace_cdn_image_environment="development"
+
+
+//Chạy riêng thêm cho từng project//
+
+*Showstar
+node scripts/replace-register-handler.js
+node scripts/replace-super-login-handler.js
+
+*Newsbridgepr
+node scripts/newsbridgepr/replace-login-handler.js
