@@ -504,6 +504,20 @@ function createAuth(http: ReturnType<typeof createHttp>, cfg: ClientConfig) {
                 body: JSON.stringify(args[0]),
               });
 
+            case "redirectToHome": {
+              const currentPath = window.location.pathname;
+
+              const homePatterns = /(home|dashboard)/i;
+              if (homePatterns.test(currentPath)) return;
+
+              const homePath = "/";
+
+              const redirectUrl = `${homePath}`;
+
+              window.location.href = redirectUrl;
+              return;
+            }
+
             case "redirectToLogin": {
               const currentUrl = args[0];
               const currentPath = window.location.pathname;

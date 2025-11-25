@@ -126,6 +126,7 @@ function buildNewAuthProvider() {
           message: 'Authentication required'
         });
         localStorage.clear();
+        base44.auth.redirectToHome();
       }
     }
   };
@@ -148,6 +149,11 @@ function buildNewAuthProvider() {
     base44.auth.redirectToLogin(window.location.href);
   };
 
+  const navigateToHome = () => {
+    // Use the SDK's redirectToHome method
+    base44.auth.redirectToHome();
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -158,6 +164,7 @@ function buildNewAuthProvider() {
       appPublicSettings,
       logout,
       navigateToLogin,
+      navigateToHome,
       checkAppState,
       setUser
     }}>
