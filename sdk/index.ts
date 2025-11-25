@@ -173,12 +173,11 @@ function createHttp(cfg: ClientConfig) {
 
     if (res.status === 204) return undefined;
 
-    // if (res.status === 401 && !!token) {
-    //   alert("Unauthorized");
-    //   //localStorage.clear();
-    //   window.location.href = "/";
-    //   throw new Base44Error("Unauthorized", 401, "unauthorized");
-    // }
+    if (res.status === 401 && !!token) {
+      localStorage.clear();
+      window.location.href = "/";
+      throw new Base44Error("Unauthorized", 401, "unauthorized");
+    }
     const ct = res.headers.get("content-type") || "";
     const text = await res.text();
     const looksJson =
