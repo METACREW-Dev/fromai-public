@@ -21,11 +21,13 @@ node scripts/replace-login-handler.js
 node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
-/Bước 8:01/ chỉ dành riêng cho dự án showstar để cấu hình cho register info,  super admin
+/Bước 8/ 
+
+[*]chỉ dành riêng cho dự án showstar để cấu hình cho register info,  super admin
 node scripts/replace-register-handler.js
 node scripts/replace-super-login-handler.js
 
-/Bước 8:02/ chỉ dành riêng cho dự án newsbridgepr để cấu hình cho login
+[*]chỉ dành riêng cho dự án newsbridgepr để cấu hình cho login
 node scripts/newsbridgepr/replace-login-handler.js
 
 
