@@ -1,6 +1,6 @@
-/Bước 1/ copy tất cả các thư mục: [public, scripts, serve.json, sdk ] vào project ở local và cùng cấp với thư mục src ở local.
+/Bước 1/ copy tất cả các thư mục: [public, scripts, serve.json ] vào project ở local và cùng cấp với thư mục src ở local.
 
-/Bước 2/ copy tất cả các thư mục: [auth-sdk] vào project ở local và nằm trong thư mục src ở local.
+/Bước 2/ copy tất cả các thư mục: [auth-sdk, sdk] vào project ở local và nằm trong thư mục src ở local.
 
 /Bước 3/ copy file .env.example vào trong source ở local và thay thông tin theo từng project
 
