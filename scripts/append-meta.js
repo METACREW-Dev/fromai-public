@@ -13,18 +13,20 @@ const targetPath = args.target || "./index.html";
 const apiUrl = args.api || args["api-url"] || null;
 const base44Url = args.url || args.base44_url || null;
 const projectKey = args.project || args.project_key || null;
+const environment = args?.environment || 'development'; // 'development' or 'production'
 const faviconUrl = args.favicon || null;
 const cdnUrl = args.cdn || null;
 const overrideTitle = args.title || null;
 
 // ---- Helpers ----
-async function fetchMeta(apiUrl, base44Url, projectKey) {
+async function fetchMeta(apiUrl, base44Url, projectKey, environment) {
   const res = await fetch(apiUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       base44_url: base44Url,
       project_key: projectKey,
+      environment: environment,
     }),
   });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
@@ -134,13 +136,13 @@ function appendToHead(targetHtml, extraHeadHtml) {
       targetHtml = "<!doctype html><html><head></head><body></body></html>";
     }
 
-    if (!apiUrl || !base44Url || !projectKey) {
-      console.error("❌ Required: --api=, --url=, and --project=");
+    if (!apiUrl || !base44Url || !projectKey || !environment) {
+      console.error("❌ Required: --api=, --url=, --project=, and --environment=");
       process.exit(1);
     }
 
     console.log(`📡 Fetching meta from ${apiUrl}...`);
-    const metaHtml = await fetchMeta(apiUrl, base44Url, projectKey);
+    const metaHtml = await fetchMeta(apiUrl, base44Url, projectKey, environment);
     if (!metaHtml.trim()) {
       console.error("❌ API returned empty meta block.");
       process.exit(1);
