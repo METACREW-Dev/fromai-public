@@ -193,7 +193,7 @@ function createHttp(cfg: ClientConfig) {
       headers: {
         Accept: "application/json",
         "x-uuid": uuid,
-        "web-url": `${webUrl}`,
+        "x-web-url": `${webUrl}`,
         ...(init?.headers || {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
