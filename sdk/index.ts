@@ -186,12 +186,14 @@ function createHttp(cfg: ClientConfig) {
   ) => {
     const url = buildUrl(path, init?.query);
     const uuid = getUuidFromCookie();
+    const webUrl = window.location.href;
     const token = (typeof window !== "undefined" ? localStorage.getItem(storageKey) : undefined);
     const res = await fetchImpl(url, {
       ...init,
       headers: {
         Accept: "application/json",
         "x-uuid": uuid,
+        "web-url": `${webUrl}`,
         ...(init?.headers || {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
