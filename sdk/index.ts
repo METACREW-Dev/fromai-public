@@ -129,6 +129,30 @@ function objectToFormData(
   return form;
 }
 
+function generateUuidV4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
+function getUuidFromCookie() {
+  let uuid: string | undefined = undefined;
+  // Check uuid in cookie
+  if (typeof document !== "undefined") {
+    const match = document.cookie.match('(^|;)\\s*x-uuid\\s*=\\s*([^;]+)');
+    if (match) {
+      uuid = match[2];
+    } else {
+      uuid = generateUuidV4();
+      document.cookie = `x-uuid=${uuid}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+  } else {
+    uuid = generateUuidV4();
+  }
+  return uuid;
+}
+
 // ================== http ==================
 function createHttp(cfg: ClientConfig) {
   const fetchImpl: any = cfg.fetchImpl ?? fetch;
@@ -161,11 +185,13 @@ function createHttp(cfg: ClientConfig) {
     init?: RequestInit & { query?: Record<string, any> }
   ) => {
     const url = buildUrl(path, init?.query);
+    const uuid = getUuidFromCookie();
     const token = (typeof window !== "undefined" ? localStorage.getItem(storageKey) : undefined);
     const res = await fetchImpl(url, {
       ...init,
       headers: {
         Accept: "application/json",
+        "x-uuid": uuid,
         ...(init?.headers || {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
