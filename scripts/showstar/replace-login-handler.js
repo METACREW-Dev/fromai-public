@@ -45,9 +45,10 @@ const NEW_APP_LOGIN_LOGIC = `useLayoutEffect(() => {
         try {
           const response = await window?.flutter_inappwebview?.callHandler("login");
           if (response && (response?.status === "success" || response?.success)) {
-            const mainUser = response?.user;
-            if (response?.token) {
-              localStorage.setItem("access_token", response.token);
+            const data = response?.data;
+            const mainUser = data?.user;
+            if (data?.accessToken) {
+              localStorage.setItem("access_token", data.accessToken);
             }
             if (mainUser) {
               if (mainUser?.role === "admin") {
