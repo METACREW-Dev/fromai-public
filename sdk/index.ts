@@ -321,14 +321,37 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
               const method = String(methodName);
               return async (...args: any[]) => {
                 switch (method) {
+                  // case "list":
+                  //   return http.request(`${entity}`, {
+                  //     method: "GET",
+                  //     query: clean({
+                  //       sort: args[0]?.sort ?? args[0],
+                  //       limit: args[0]?.limit ?? args[1],
+                  //       skip: args[0]?.skip ?? args[2],
+                  //       fields: arrToCsv(args[0]?.fields ?? args[3]),
+                  //     }),
+                  //   });
+                  // case "filter": {
+                  //   const p = args[0] ?? {};
+                  //   return http.request(`${entity}`, {
+                  //     method: "GET",
+                  //     query: clean({
+                  //       q: JSON.stringify(p.q ?? p ?? {}),
+                  //       sort: p.sort,
+                  //       limit: p.limit,
+                  //       skip: p.skip,
+                  //       fields: arrToCsv(p.fields),
+                  //     }),
+                  //   });
+                  // }
                   case "list":
                     return http.request(`${entity}`, {
                       method: "GET",
                       query: clean({
-                        sort: args[0]?.sort ?? args[0],
-                        limit: args[0]?.limit ?? args[1],
-                        skip: args[0]?.skip ?? args[2],
-                        fields: arrToCsv(args[0]?.fields ?? args[3]),
+                        sort: args?.[1],
+                        limit: args?.[2],
+                        skip: args?.[3],
+                        fields: arrToCsv(args[0]?.fields || ''),
                       }),
                     });
                   case "filter": {
@@ -337,10 +360,10 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                       method: "GET",
                       query: clean({
                         q: JSON.stringify(p.q ?? p ?? {}),
-                        sort: p.sort,
-                        limit: p.limit,
-                        skip: p.skip,
-                        fields: arrToCsv(p.fields),
+                        sort: args?.[1],
+                        limit: args?.[2],
+                        skip: args?.[3],
+                        fields: arrToCsv(p.fields || ''),
                       }),
                     });
                   }
