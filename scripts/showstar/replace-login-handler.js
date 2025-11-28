@@ -60,6 +60,7 @@ const NEW_APP_LOGIN_LOGIC = `useLayoutEffect(() => {
                 localStorage.setItem("superAdminSession", JSON.stringify(session));
               }
               await login(mainUser);
+              window.location.href = "/";
             }
           }
         } catch (error) {
