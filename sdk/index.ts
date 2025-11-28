@@ -348,10 +348,10 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                     return http.request(`${entity}`, {
                       method: "GET",
                       query: clean({
-                        sort: args?.[1],
-                        limit: args?.[2],
-                        skip: args?.[3],
-                        fields: arrToCsv(args[0]?.fields || ''),
+                        sort: args[0]?.sort ?? args?.[0],
+                        limit: args[0]?.limit ?? args?.[1],
+                        skip: args[0]?.skip ?? args?.[2],
+                        fields: arrToCsv(args[0]?.fields ?? args[3]),
                       }),
                     });
                   case "filter": {
@@ -363,7 +363,7 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
                         sort: args?.[1],
                         limit: args?.[2],
                         skip: args?.[3],
-                        fields: arrToCsv(p.fields || ''),
+                        fields: arrToCsv(p.fields),
                       }),
                     });
                   }
