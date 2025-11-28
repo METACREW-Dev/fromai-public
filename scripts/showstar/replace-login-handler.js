@@ -146,8 +146,7 @@ function replaceHandleSubmitFunction(content, functionName) {
 
 function addAppLoginLogic(content) {
   const hasAppLoginLogic =
-    content.includes("handleAppLogin") &&
-    content.includes('flutter_inappwebview?.callHandler("login")');
+    content.includes("handleAppLogin");
   if (hasAppLoginLogic) {
     return content;
   }
