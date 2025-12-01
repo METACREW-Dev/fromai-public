@@ -22,7 +22,7 @@ let code = fs.readFileSync(targetFile, "utf8");
 
 const checkAppLogin = `
   useEffect(() => {
-    if (window.location.search.includes('isAppLogin=true') && window?.flutter_inappwebview) {
+    if (window?.location?.search?.includes('isAppLogin=true') && window?.flutter_inappwebview) {
       const handleAppLogin = async () => {
         try {
           const response = await window?.flutter_inappwebview?.callHandler("get_user_info");
@@ -54,7 +54,7 @@ const checkAppLogin = `
       };
       handleAppLogin();
     }
-  }, []);
+  }, [window?.location?.search]);
 `
 
 // Add useEffect import if not present
