@@ -54,7 +54,7 @@ const checkAppLogin = `
       };
       handleAppLogin();
     }
-  }, [window?.location?.search]);
+  }, []);
 `
 
 // Add useEffect import if not present
