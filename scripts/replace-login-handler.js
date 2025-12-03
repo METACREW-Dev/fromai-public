@@ -10,7 +10,7 @@ const newLogic = `
   e.preventDefault();
   setError("");
   
-  if (!formData.email || !formData.password) {
+  if ((!formData.email && !formData.user_email) || !formData.password) {
     setError("이메일과 비밀번호를 모두 입력해주세요.");
     return;
   }
@@ -19,7 +19,7 @@ const newLogic = `
   
   try {
     // Login with Base44 authentication using email and password
-    const response = await base44.auth.loginViaEmailPassword(formData.email, formData.password);
+    const response = await base44.auth.loginViaEmailPassword(formData.email || formData.user_email, formData.password);
     
     const mainUser = response?.user;
     if (response?.token) {
