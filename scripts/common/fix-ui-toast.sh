@@ -41,7 +41,7 @@ fi
 
 # Fix toast.jsx - Add pointer-events-none to ToastViewport className (line 18)
 # Check if ToastViewport line needs the fix
-if grep -A 2 'const ToastViewport' "$TOAST_FILE" | grep -q 'md:max-w-\[420px\]"' && \
+if [ -f "$TOAST_FILE" ] && grep -A 2 'const ToastViewport' "$TOAST_FILE" | grep -q 'md:max-w-\[420px\]"' && \
    ! grep -A 2 'const ToastViewport' "$TOAST_FILE" | grep -q 'pointer-events-none'; then
   echo "  - Adding pointer-events-none to ToastViewport..."
   # Use sed to replace the specific line in ToastViewport section
@@ -53,7 +53,7 @@ else
 fi
 
 # Fix toaster.jsx - Add dismiss to useToast destructuring
-if ! grep -q 'const { toasts, dismiss } = useToast();' "$TOASTER_FILE"; then
+if [ -f "$TOASTER_FILE" ] && ! grep -q 'const { toasts, dismiss } = useToast();' "$TOASTER_FILE"; then
   if grep -q 'const { toasts } = useToast();' "$TOASTER_FILE"; then
     echo "  - Adding dismiss to useToast destructuring..."
     $SED_IN_PLACE 's/const { toasts } = useToast();/const { toasts, dismiss } = useToast();/' "$TOASTER_FILE"
@@ -65,7 +65,7 @@ else
 fi
 
 # Fix toaster.jsx - Add onClick handler to ToastClose
-if ! grep -q 'onClick={(e) => {' "$TOASTER_FILE"; then
+if [ -f "$TOASTER_FILE" ] && ! grep -q 'onClick={(e) => {' "$TOASTER_FILE"; then
   if grep -q '<ToastClose' "$TOASTER_FILE"; then
     echo "  - Adding onClick handler to ToastClose..."
     # Use awk to replace <ToastClose /> with multi-line version

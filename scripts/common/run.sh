@@ -1,2 +1,2 @@
 #!/bin/bash
-sh ./scripts/common/fix-ui-toast.sh
+bash ./scripts/common/fix-ui-toast.sh
