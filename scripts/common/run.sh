@@ -1,2 +1,2 @@
-#!/bin/bash
-sh ./scripts/common/fix-ui-toast.sh
+#!/bin/sh
+node ./scripts/common/fix-ui-toast.js
