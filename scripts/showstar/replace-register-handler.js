@@ -70,8 +70,7 @@ export default function RegisterInfoBasePage() {
         });
       } else {
         toast({
-          title: "지원서 저장 완료!",
-          description: "방금 제출한 지원서가 안전하게 저장되었어요!",
+          title: "회원가입이 완료되었습니다!",
         });
       }
       setTimeout(() => { window.location.href = "/";}, 2000);
