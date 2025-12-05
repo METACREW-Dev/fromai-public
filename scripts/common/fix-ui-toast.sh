@@ -6,6 +6,13 @@
 
 set -e
 
+# Detect OS for sed compatibility
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  SED_IN_PLACE="sed -i ''"
+else
+  SED_IN_PLACE="sed -i"
+fi
+
 # Get the project root directory
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TOAST_FILE="${PROJECT_ROOT}/src/components/ui/toast.jsx"
@@ -13,11 +20,20 @@ TOASTER_FILE="${PROJECT_ROOT}/src/components/ui/toaster.jsx"
 
 echo "Applying fixes to toast components..."
 
+# Check if files exist
+if [ ! -f "$TOAST_FILE" ]; then
+  echo "Warning: toast.jsx not found at $TOAST_FILE, skipping toast.jsx fixes"
+fi
+if [ ! -f "$TOASTER_FILE" ]; then
+  echo "Warning: toaster.jsx not found at $TOASTER_FILE, skipping toaster.jsx fixes"
+  exit 0
+fi
+
 # Fix toast.jsx - Add pointer-events-none to ToastProvider className (line 9)
-if grep -q 'md:max-w-\[420px\]"' "$TOAST_FILE"; then
+if [ -f "$TOAST_FILE" ] && grep -q 'md:max-w-\[420px\]"' "$TOAST_FILE"; then
   if ! grep -q 'md:max-w-\[420px\] pointer-events-none"' "$TOAST_FILE"; then
     echo "  - Adding pointer-events-none to ToastProvider..."
-    sed -i '' 's/md:max-w-\[420px\]"/md:max-w-\[420px\] pointer-events-none"/g' "$TOAST_FILE"
+    $SED_IN_PLACE 's/md:max-w-\[420px\]"/md:max-w-\[420px\] pointer-events-none"/g' "$TOAST_FILE"
   else
     echo "  - ToastProvider already has pointer-events-none"
   fi
@@ -29,7 +45,7 @@ if grep -A 2 'const ToastViewport' "$TOAST_FILE" | grep -q 'md:max-w-\[420px\]"'
    ! grep -A 2 'const ToastViewport' "$TOAST_FILE" | grep -q 'pointer-events-none'; then
   echo "  - Adding pointer-events-none to ToastViewport..."
   # Use sed to replace the specific line in ToastViewport section
-  sed -i '' '/const ToastViewport/,/ToastViewport\.displayName/ {
+  $SED_IN_PLACE '/const ToastViewport/,/ToastViewport\.displayName/ {
     s/md:max-w-\[420px\]"/md:max-w-\[420px\] pointer-events-none"/
   }' "$TOAST_FILE"
 else
@@ -40,7 +56,7 @@ fi
 if ! grep -q 'const { toasts, dismiss } = useToast();' "$TOASTER_FILE"; then
   if grep -q 'const { toasts } = useToast();' "$TOASTER_FILE"; then
     echo "  - Adding dismiss to useToast destructuring..."
-    sed -i '' 's/const { toasts } = useToast();/const { toasts, dismiss } = useToast();/' "$TOASTER_FILE"
+    $SED_IN_PLACE 's/const { toasts } = useToast();/const { toasts, dismiss } = useToast();/' "$TOASTER_FILE"
   else
     echo "  - Warning: Could not find useToast() call in toaster.jsx"
   fi

@@ -21,7 +21,7 @@ node scripts/replace-login-handler.js
 node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
-bash scripts/common/fix-ui-toast.js
+bash scripts/common/run.sh
 
 /Bước 8/ 
 
