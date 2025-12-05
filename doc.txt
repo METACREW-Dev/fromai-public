@@ -21,6 +21,8 @@ node scripts/replace-login-handler.js
 node scripts/replace-auth-handler.js
 node scripts/replace-app-handler.js
 
+bash scripts/common/fix-ui-toast.js
+
 /Bước 8/ 
 
 [*]chỉ dành riêng cho dự án showstar để cấu hình cho register info,  super admin
