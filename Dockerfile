@@ -16,14 +16,14 @@ RUN node scripts/replace-auth-handler.js && \
 
 RUN node scripts/append-meta.js \
     --api="https://console-planb-api.leveragehero.net/base44-tools/sync-meta-tags" \
-    --url="${{ env.BASE44_URL }}" \
-    --project_key="${{ env.PROJECT_KEY }}" \
-    --environment='${{ env.ENV == 'prod' && 'production' || 'development' }}'
+    --url="{BASE44_URL}" \
+    --project_key="{PROJECT_KEY}" \
+    --environment='{environment}'
 
 RUN node scripts/replace-image-cdn-handler.js \
     --api="https://console-planb-api.leveragehero.net/base44-tools/sync-file" \
-    --project_key="${{ env.PROJECT_KEY }}" \
-    --environment='${{ env.ENV == 'prod' && 'production' || 'development' }}'
+    --project_key="{PROJECT_KEY}" \
+    --environment='{environment}'
 
 RUN npm run build
 
