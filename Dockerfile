@@ -1,14 +1,17 @@
+# Stage 1: Build the React application
 FROM metacrew2023.azurecr.io/base/node:20-alpine AS build
+
 WORKDIR /app
+
 COPY package*.json .
 RUN npm install && npm install -g serve
+
 COPY . .
+
 RUN sh ./scripts/common/run.sh
 
 RUN node scripts/replace-auth-handler.js && \
     node scripts/replace-login-handler.js && \
-    node scripts/replace-register-handler.js && \
-    node scripts/replace-super-login-handler.js && \
     node scripts/replace-app-handler.js
 
 RUN node scripts/append-meta.js \
@@ -23,5 +26,7 @@ RUN node scripts/replace-image-cdn-handler.js \
     --environment='${{ env.ENV == 'prod' && 'production' || 'development' }}'
 
 RUN npm run build
+
 EXPOSE 3000
-CMD ["serve", "-c", "serve.json"]
+
+CMD ["serve", "-s", "dist"]
