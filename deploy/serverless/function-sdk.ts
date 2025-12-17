@@ -12,13 +12,6 @@ interface CustomClient {
 }
 
 /**
- * Get backend API URL from environment or use default
- */
-function getBackendUrl(): string {
-  return Deno.env.get('BACKEND_API_URL') || 'https://dev-bannermaker-api.leveragehero.net';
-}
-
-/**
  * Extract authorization token from request headers
  */
 function getAuthToken(req: Request): string | null {
@@ -208,6 +201,7 @@ function createIntegrations(http: ReturnType<typeof createHttp>) {
  */
 export function createClientFromRequest(req: Request): CustomClient {
   const backendUrl = Deno.env.get('VITE_API_URL');
+  console.log('DENO ENV', backendUrl);
   if (!backendUrl) {
     throw new Error('BACKEND_API_URL is not set');
   }
@@ -221,4 +215,3 @@ export function createClientFromRequest(req: Request): CustomClient {
     },
   };
 }
-
