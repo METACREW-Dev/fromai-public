@@ -19,3 +19,7 @@ cp fromai-public/scripts/replace-image-cdn-handler.js scripts/replace-image-cdn-
 
 # Dockerfile
 cp fromai-public/deploy/fe/Dockerfile Dockerfile
+cp fromai-public/deploy/serverless/Dockerfile serverlessDockerfile
+
+# Import auth-sdk in main.jsx
+sed -i '1i import "./auth-sdk/index";' src/main.jsx

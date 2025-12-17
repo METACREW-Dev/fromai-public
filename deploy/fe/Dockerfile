@@ -18,12 +18,12 @@ RUN node scripts/append-meta.js \
     --api="https://console-planb-api.leveragehero.net/base44-tools/sync-meta-tags" \
     --url="{BASE44_URL}" \
     --project_key="{PROJECT_KEY}" \
-    --environment='{environment}'
+    --environment='{ENVIRONMENT}'
 
 RUN node scripts/replace-image-cdn-handler.js \
     --api="https://console-planb-api.leveragehero.net/base44-tools/sync-file" \
     --project_key="{PROJECT_KEY}" \
-    --environment='{environment}'
+    --environment='{ENVIRONMENT}'
 
 RUN npm run build
 
