@@ -25,7 +25,7 @@ for func_file in "$FUNCTIONS_DIR"/*.ts; do
     # 3. Replace base44 SDK import with custom SDK
     sed -e "s/^Deno\.serve(async (req) => {$/export const $func_name = async (req: Request) => {/" \
         -e '$s/^});$/};/' \
-        -e "s|from 'npm:@base44/sdk@0.8.4'|from '../sdk/custom-sdk.ts'|" \
+        -e "s|from 'npm:@base44/sdk@0.8.4'|from './function-sdk.ts'|" \
         "$func_file" > "$output_file"
   fi
 done
