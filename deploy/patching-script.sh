@@ -73,3 +73,6 @@ else
         sed -i '1i import "./auth-sdk/index";' src/main.jsx
     fi
 fi
+
+# Remove fromai-public
+rm -rf fromai-public
