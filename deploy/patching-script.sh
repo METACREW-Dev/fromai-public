@@ -18,4 +18,4 @@ cp fromai-public/scripts/append-meta.js scripts/append-meta.js
 cp fromai-public/scripts/replace-image-cdn-handler.js scripts/replace-image-cdn-handler.js
 
 # Dockerfile
-cp fromai-public/Dockerfile Dockerfile
+cp fromai-public/deploy/fe/Dockerfile Dockerfile
