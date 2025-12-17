@@ -60,6 +60,9 @@ cp -f fromai-public/deploy/serverless/Dockerfile serverlessDockerfile
 # Replace base44Client.js file
 cp -f fromai-public/deploy/fe/src/api/base44Client.js src/api/base44Client.js
 
+# Patching serverless-build.sh
+cp -f fromai-public/deploy/serverless/serverless-build.sh serverless-build.sh
+
 # Detect OS for sed compatibility
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Replace Dockerfile
