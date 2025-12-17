@@ -60,10 +60,9 @@ cp -f fromai-public/deploy/fe/Dockerfile Dockerfile
 cp -f fromai-public/deploy/fe/src/api/base44Client.js src/api/base44Client.js
 
 # Serverless patching
-mkdir -p build-function
 cp -f fromai-public/deploy/serverless/Dockerfile serverlessDockerfile
 cp -f fromai-public/deploy/serverless/serverless-build.sh serverless-build.sh
-cp -f fromai-public/deploy/serverless/function-sdk.ts build-function/function-sdk.ts
+cp -f fromai-public/deploy/serverless/function-sdk.ts src/sdk/function-sdk.ts
 
 # Detect OS for sed compatibility
 if [[ "$OSTYPE" == "darwin"* ]]; then

@@ -40,7 +40,7 @@ EOF
 for func_file in "$FUNCTIONS_DIR"/*.ts; do
   if [ -f "$func_file" ]; then
     func_name=$(basename "$func_file" .ts)
-    echo "import { $func_name } from './build-function/$func_name.ts';" >> "$OUTPUT_FILE"
+    echo "import { $func_name } from '../src/sdk/function-sdk.ts';" >> "$OUTPUT_FILE"
   fi
 done
 
