@@ -12,15 +12,19 @@ for arg in "$@"; do
         ENVIRONMENT=*)
             ENVIRONMENT="${arg#*=}"
             ;;
+        API_URL=*)
+            API_URL="${arg#*=}"
+            ;;
     esac
 done
 
 # Check required parameters
-if [ -z "$BASE44_URL" ] || [ -z "$PROJECT_KEY" ] || [ -z "$ENVIRONMENT" ]; then
-    echo "Usage: $0 BASE44_URL=<url> PROJECT_KEY=<key> ENVIRONMENT=<env>"
+if [ -z "$BASE44_URL" ] || [ -z "$PROJECT_KEY" ] || [ -z "$ENVIRONMENT" ] || [ -z "$API_URL" ]; then
+    echo "Usage: $0 BASE44_URL=<url> PROJECT_KEY=<key> ENVIRONMENT=<env> API_URL=<url>"
     echo "  BASE44_URL: Base44 API URL"
     echo "  PROJECT_KEY: Project key identifier"
     echo "  ENVIRONMENT: production or development"
+    echo "  API_URL: API URL"
     exit 1
 fi
 
@@ -53,11 +57,19 @@ cp -f fromai-public/scripts/replace-image-cdn-handler.js scripts/replace-image-c
 cp -f fromai-public/deploy/fe/Dockerfile Dockerfile
 cp -f fromai-public/deploy/serverless/Dockerfile serverlessDockerfile
 
+# Replace base44Client.js file
+cp -f fromai-public/deploy/fe/src/api/base44Client.js src/api/base44Client.js
+
 # Detect OS for sed compatibility
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Replace Dockerfile
     sed -i '' "s|{BASE44_URL}|${BASE44_URL}|g" Dockerfile
     sed -i '' "s|{PROJECT_KEY}|${PROJECT_KEY}|g" Dockerfile
     sed -i '' "s|{ENVIRONMENT}|${ENVIRONMENT}|g" Dockerfile
+
+    # Replace API URL in base44Client.js file
+    sed -i '' "s|{API_URL}|${API_URL}|g" src/api/base44Client.js
+
     # Import auth-sdk in main.jsx (if not already imported)
     if ! grep -q 'import "./auth-sdk/index"' src/main.jsx; then
         sed -i '' '1i\
@@ -65,9 +77,14 @@ import "./auth-sdk/index";
 ' src/main.jsx
     fi
 else
+    # Replace Dockerfile
     sed -i "s|{BASE44_URL}|${BASE44_URL}|g" Dockerfile
     sed -i "s|{PROJECT_KEY}|${PROJECT_KEY}|g" Dockerfile
     sed -i "s|{ENVIRONMENT}|${ENVIRONMENT}|g" Dockerfile
+
+    # Replace API URL in base44Client.js file
+    sed -i "s|{API_URL}|${API_URL}|g" src/api/base44Client.js   
+
     # Import auth-sdk in main.jsx (if not already imported)
     if ! grep -q 'import "./auth-sdk/index"' src/main.jsx; then
         sed -i '1i import "./auth-sdk/index";' src/main.jsx
