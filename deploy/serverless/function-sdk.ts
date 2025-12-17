@@ -207,7 +207,10 @@ function createIntegrations(http: ReturnType<typeof createHttp>) {
  * Compatible with base44 SDK interface
  */
 export function createClientFromRequest(req: Request): CustomClient {
-  const backendUrl = getBackendUrl();
+  const backendUrl = Deno.env.get('VITE_API_URL');
+  if (!backendUrl) {
+    throw new Error('BACKEND_API_URL is not set');
+  }
   const token = getAuthToken(req);
   const http = createHttp(backendUrl, token);
   
