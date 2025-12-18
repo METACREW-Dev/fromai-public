@@ -482,6 +482,48 @@ function createEntities(http: ReturnType<typeof createHttp>): EntitiesModule {
   );
 }
 
+
+// ================== functions ==================
+export function createFunctionsModule(http: ReturnType<typeof createHttp>) {
+  // Using nested Proxy objects to handle dynamic function names
+  return {
+    async invoke(functionName: string, data: any) {
+      // Validate input
+      if (typeof data === "string") {
+        throw new Error(`Function ${functionName} must receive an object with named parameters, received: ${data}`);
+      }
+      let formData: any;
+      let contentType;
+      // Handle file uploads with FormData
+      if (data instanceof FormData ||
+        (data && Object.values(data).some((value) => value instanceof File))) {
+        formData = new FormData();
+        Object.keys(data).forEach((key) => {
+          if (data[key] instanceof File) {
+            formData.append(key, data[key], data[key].name);
+          }
+          else if (typeof data[key] === "object" && data[key] !== null) {
+            formData.append(key, JSON.stringify(data[key]));
+          }
+          else {
+            formData.append(key, data[key]);
+          }
+        });
+        contentType = "multipart/form-data";
+      }
+      else {
+        formData = data;
+        contentType = "application/json";
+      }
+      return http.request(`/functions/${functionName}`, {
+        headers: { "Content-Type": contentType },
+        method: "POST",
+        body: JSON.stringify(formData || data),
+      });
+    },
+  };
+}
+
 // ================== integrations (2-level, multipart-aware) ==================
 function createIntegrations(
   http: ReturnType<typeof createHttp>
@@ -755,6 +797,7 @@ export function createClient(config: ClientConfig): Base44Client {
     entities: createEntities(http),
     integrations: createIntegrations(http),
     auth: createAuth(http, config),
+    functions: createFunctionsModule(http),
     asServiceRole: createAsServiceRole(http, config.token),
     setToken: (t: string) => http.setToken(t, true),
     getConfig: () => ({ serverUrl: config.serverUrl }),
