@@ -52,6 +52,12 @@ Deno.serve({ port: 8000 }, async (req: Request) => {
 
   // Router đơn giản dựa trên path
   switch (url.pathname) {
+    case '':
+    case '/':
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
 EOF
 
 # Add routes
