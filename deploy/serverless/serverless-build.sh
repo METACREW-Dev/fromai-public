@@ -20,12 +20,13 @@ for func_file in "$FUNCTIONS_DIR"/*.ts; do
     echo "Processing $func_file -> $output_file"
     
     # Transform the function:
-    # 1. Replace "Deno.serve(async (req) => {" with "export const functionName = async (req: Request) => {"
+    # 1. Replace "Deno.serve(async (req) => {" or "export default Deno.serve(async (req) => {" with "export const functionName = async (req: Request) => {"
     # 2. Replace the last "});" at the end with "};"
     # 3. Replace base44 SDK import with custom SDK
-    sed -e "s/^Deno\.serve(async (req) => {$/export const $func_name = async (req: Request) => {/" \
+    sed -e "s/^export default Deno\.serve(async (req) => {$/export const $func_name = async (req: Request) => {/" \
+        -e "s/^Deno\.serve(async (req) => {$/export const $func_name = async (req: Request) => {/" \
         -e '$s/^});$/};/' \
-        -e "s|from 'npm:@base44/sdk@0.8.4'|from '../src/sdk/function-sdk.ts'|" \
+        -e "s|from ['\"][^'\"]*@base44/sdk[^'\"]*['\"]|from '../src/sdk/function-sdk.ts'|g" \
         "$func_file" > "$output_file"
   fi
 done
