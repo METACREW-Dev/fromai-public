@@ -44,12 +44,12 @@ const checkAppLogin = `
                 };
                 localStorage.setItem("superAdminSession", JSON.stringify(session));
               }
-              // await login(mainUser);
               if(window?.location?.search?.includes('isFirstLogin=true') && mainUser?.user_type === "artist"){
                 window.location.href = "/onboarding";
               }else {
                 window.location.href = "/";
               }
+              // await login(mainUser);
             }
           }
         } catch (error) {
