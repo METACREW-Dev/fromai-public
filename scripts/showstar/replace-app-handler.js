@@ -45,7 +45,7 @@ const checkAppLogin = `
                 localStorage.setItem("superAdminSession", JSON.stringify(session));
               }
               // await login(mainUser);
-              if(window?.location?.search?.includes('isAppLoginFrist=true')){
+              if(window?.location?.search?.includes('isFirstLogin=true')){
                 window.location.href = "/onboarding";
               }else {
                 window.location.href = "/";
