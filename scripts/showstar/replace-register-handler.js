@@ -73,7 +73,11 @@ export default function RegisterInfoBasePage() {
           title: "회원가입이 완료되었습니다!",
         });
       }
-      setTimeout(() => { window.location.href = "/";}, 2000);
+      if (user_type === "artist") {
+          setTimeout(() => { window.location.href = "/onboarding";}, 2000);
+      } else {
+          setTimeout(() => { window.location.href = "/";}, 2000);
+      }
       
     } catch (error) {
       console.error("Register error:", error);
@@ -315,9 +319,9 @@ if (!importRegex.test(pagesConfigContent)) {
     const lastImport = lastImportMatch[lastImportMatch.length - 1];
     const lastImportIndex = pagesConfigContent.lastIndexOf(lastImport);
     const insertIndex = lastImportIndex + lastImport.length;
-    pagesConfigContent = 
-      pagesConfigContent.slice(0, insertIndex) + 
-      "\n" + importStatement + 
+    pagesConfigContent =
+      pagesConfigContent.slice(0, insertIndex) +
+      "\n" + importStatement +
       pagesConfigContent.slice(insertIndex);
     console.log(`✅ Added import: ${importStatement}`);
   }
@@ -338,7 +342,7 @@ if (!pageEntryRegex.test(pagesConfigContent)) {
     let braceCount = 0;
     let pagesObjectEnd = pagesObjectStart;
     let foundStart = false;
-    
+
     for (let i = pagesObjectStart; i < pagesConfigContent.length; i++) {
       if (pagesConfigContent[i] === '{') {
         braceCount++;
@@ -351,7 +355,7 @@ if (!pageEntryRegex.test(pagesConfigContent)) {
         }
       }
     }
-    
+
     // Tìm entry cuối cùng trong PAGES object
     const pagesObjectSection = pagesConfigContent.slice(pagesObjectStart, pagesObjectEnd);
     // Tìm tất cả các dòng có pattern "key": value,
@@ -359,30 +363,30 @@ if (!pageEntryRegex.test(pagesConfigContent)) {
     let match;
     let lastMatchIndex = -1;
     let lastMatchEnd = -1;
-    
+
     while ((match = entryPattern.exec(pagesObjectSection)) !== null) {
       lastMatchIndex = match.index;
       lastMatchEnd = match.index + match[0].length;
     }
-    
+
     if (lastMatchIndex !== -1) {
       // Tìm entry cuối cùng và chèn sau nó
       const insertIndex = pagesObjectStart + lastMatchEnd;
       const entryBeforeInsert = pagesObjectSection.slice(lastMatchIndex, lastMatchEnd);
       const needsComma = !entryBeforeInsert.trim().endsWith(",");
       const newEntry = `${needsComma ? "," : ""}\n    "${pageRoute}": ${importVariableName},`;
-      pagesConfigContent = 
-        pagesConfigContent.slice(0, insertIndex) + 
-        newEntry + 
+      pagesConfigContent =
+        pagesConfigContent.slice(0, insertIndex) +
+        newEntry +
         pagesConfigContent.slice(insertIndex);
       console.log(`✅ Added PAGES entry: "${pageRoute}": ${importVariableName}`);
     } else {
       // Nếu không tìm thấy entry nào, chèn sau dấu mở ngoặc nhọn
       const openBraceIndex = pagesConfigContent.indexOf("{", pagesObjectStart);
       const newEntry = `\n    "${pageRoute}": ${importVariableName},`;
-      pagesConfigContent = 
-        pagesConfigContent.slice(0, openBraceIndex + 1) + 
-        newEntry + 
+      pagesConfigContent =
+        pagesConfigContent.slice(0, openBraceIndex + 1) +
+        newEntry +
         pagesConfigContent.slice(openBraceIndex + 1);
       console.log(`✅ Added PAGES entry: "${pageRoute}": ${importVariableName}`);
     }
