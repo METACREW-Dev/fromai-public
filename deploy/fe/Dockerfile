@@ -14,6 +14,11 @@ RUN node scripts/replace-auth-handler.js && \
     node scripts/replace-login-handler.js && \
     node scripts/replace-app-handler.js
 
+# If exists, scripts/firebase-sdk/append-service-notification.js then run it
+RUN if [ -f "scripts/firebase-sdk/append-service-notification.js" ]; then \
+        node scripts/firebase-sdk/append-service-notification.js; \
+    fi
+
 RUN node scripts/append-meta.js \
     --api="https://console-planb-api.leveragehero.net/base44-tools/sync-meta-tags" \
     --url="{BASE44_URL}" \
