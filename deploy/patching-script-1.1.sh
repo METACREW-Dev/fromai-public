@@ -55,7 +55,7 @@ cp -f fromai-public/scripts/replace-image-cdn-handler.js scripts/replace-image-c
 
 if [ "$PROJECT_KEY" == "695c9dcd9cd53588b2997ab5" ]; then
     mkdir -p scripts/firebase-sdk
-    cp -r fromai-public/scripts/vibex-first-contact scripts/firebase-sdk/
+    cp -r fromai-public/scripts/vibex-first-contact/* scripts/firebase-sdk/
 fi
 
 # Patching Dockerfile
