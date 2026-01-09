@@ -4,7 +4,7 @@ import path from "path";
 const rootDir = process.cwd();
 
 // Paths
-const scriptsDir = path.join(rootDir, 'scripts', 'vibex-first-contact');
+const scriptsDir = path.join(rootDir, 'scripts', 'firebase-sdk');
 const sourceFirebaseDir = path.join(scriptsDir, 'firebase');
 const targetFirebaseDir = path.join(rootDir, 'src', 'firebase');
 
@@ -120,8 +120,8 @@ if (typeof window !== 'undefined') {
                 }
 
                 if (!packageJson.dependencies['firebase']) {
-                    log.info('Adding "firebase": "^12.3.0" to dependencies...');
-                    packageJson.dependencies['firebase'] = "^12.3.0";
+                    log.info('Adding "firebase": "12.3.0" to dependencies...');
+                    packageJson.dependencies['firebase'] = "12.3.0";
                     fs.writeFileSync(packageJsonFile, JSON.stringify(packageJson, null, 2), 'utf-8'); // Indent with 2 spaces
                     log.success(`Added firebase dependency to ${packageJsonFile}`);
                 } else {
