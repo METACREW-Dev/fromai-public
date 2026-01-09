@@ -33,8 +33,7 @@ const newLogic = `
     if (mainUser) {
         await login(mainUser);
     }
-    
-    window.location.href = "/";
+    //window.location.href = "/";
   } catch (error) {
     console.error("Login error:", error);
     setError(error.message || "이메일 또는 비밀번호가 잘못되었습니다. 다시 시도해 주세요.");
