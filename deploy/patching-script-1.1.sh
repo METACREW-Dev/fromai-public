@@ -54,6 +54,8 @@ cp -f fromai-public/scripts/append-meta.js scripts/append-meta.js
 cp -f fromai-public/scripts/replace-image-cdn-handler.js scripts/replace-image-cdn-handler.js
 
 if [ "$PROJECT_KEY" == "695c9dcd9cd53588b2997ab5" ]; then
+    echo "Project key is VibeX Partners"
+    cp -f fromai-public/scripts/vibex-first-contact/replace-login-handler.js scripts/replace-login-handler.js
     mkdir -p scripts/firebase-sdk
     cp -r fromai-public/scripts/vibex-first-contact/. scripts/firebase-sdk/
 fi
