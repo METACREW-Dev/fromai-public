@@ -5,9 +5,9 @@ const projectRoot = process.cwd();
 
 const targetFiles = [
   "src/pages/SignIn.jsx",
-  "src/pages/signin.tsx",
+  "src/pages/signin.jsx",
   "src/pages/Login.jsx",
-  "src/pages/login.tsx"
+  "src/pages/login.jsx"
 ];
 
 const newLogic = `
