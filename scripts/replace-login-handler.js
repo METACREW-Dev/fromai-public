@@ -3,7 +3,12 @@ import fs from "fs";
 
 const projectRoot = process.cwd();
 
-const targetFiles = ["src/pages/SignIn.jsx", "src/pages/Login.jsx"];
+const targetFiles = [
+  "src/pages/SignIn.jsx",
+  "src/pages/signin.tsx",
+  "src/pages/Login.jsx",
+  "src/pages/login.tsx"
+];
 
 const newLogic = `
 {
