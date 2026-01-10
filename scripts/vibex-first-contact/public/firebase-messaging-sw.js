@@ -14,13 +14,22 @@ importScripts(
 const IS_DEBUG = self.location.hostname === "localhost";
 
 // --- IMPORTANT: Replace with your project's Firebase configuration ---
+//firebase.initializeApp({
+//  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+//  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+//  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+//  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+//  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+//  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+//});
+
 firebase.initializeApp({
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: 'AIzaSyDx2qLhf6iFNZ2a5DMJHAmah9UoHdz6NiM',
+  authDomain: 'fanstory-46e5d.firebaseapp.com',
+  projectId: 'fanstory-46e5d',
+  storageBucket: 'fanstory-46e5d.firebasestorage.app',
+  messagingSenderId: '396136388255',
+  appId: '1:396136388255:web:475e20035bd26278e3f4aa',
 });
 const messaging = firebase.messaging();
 
