@@ -24,12 +24,12 @@ const IS_DEBUG = self.location.hostname === "localhost";
 //});
 
 firebase.initializeApp({
-  apiKey: 'AIzaSyDx2qLhf6iFNZ2a5DMJHAmah9UoHdz6NiM',
-  authDomain: 'fanstory-46e5d.firebaseapp.com',
-  projectId: 'fanstory-46e5d',
-  storageBucket: 'fanstory-46e5d.firebasestorage.app',
-  messagingSenderId: '396136388255',
-  appId: '1:396136388255:web:475e20035bd26278e3f4aa',
+  apiKey: 'AIzaSyB7wKWXj15zRPian8dlmQtHsuoLqR4bTj0',
+  authDomain: 'vibe-x-first-contact.firebaseapp.com',
+  projectId: 'vibe-x-first-contact',
+  storageBucket: 'fvibe-x-first-contact.firebasestorage.app',
+  messagingSenderId: '350092685024',
+  appId: '1:350092685024:web:22f0d9a07f73619e852a85',
 });
 const messaging = firebase.messaging();
 
