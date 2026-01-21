@@ -38,4 +38,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-CMD ["serve", "-s", "dist"]
+CMD ["sh", "-c", "if [ -f \"serve.json\" ]; then exec serve -c serve.json; else exec serve -s dist; fi"]
