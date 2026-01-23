@@ -6,6 +6,8 @@
     { "source": "/naver1ddc0e4ccadaa8d8d641947c2723f2b4", "destination": "/naver1ddc0e4ccadaa8d8d641947c2723f2b4.html" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/sitemap", "destination": "/sitemap.xml" },
+    { "source": "/robot.txt", "destination": "/robot.txt" },
+    { "source": "/robot", "destination": "/robot.txt" },
     { "source": "/**", "destination": "/index.html" }
   ]
 }
