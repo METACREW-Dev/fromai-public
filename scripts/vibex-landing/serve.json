@@ -4,6 +4,8 @@
   "rewrites": [
     { "source": "/naver1ddc0e4ccadaa8d8d641947c2723f2b4.html", "destination": "/naver1ddc0e4ccadaa8d8d641947c2723f2b4.html" },
     { "source": "/naver1ddc0e4ccadaa8d8d641947c2723f2b4", "destination": "/naver1ddc0e4ccadaa8d8d641947c2723f2b4.html" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/sitemap", "destination": "/sitemap.xml" },
     { "source": "/**", "destination": "/index.html" }
   ]
 }
